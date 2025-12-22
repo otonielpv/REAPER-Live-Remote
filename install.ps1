@@ -131,6 +131,13 @@ $swsDlls = @(
     "$env:ProgramFiles\REAPER\UserPlugins\reaper_sws64.dll"
 )
 
+# Archivos de configuración que solo existen si SWS está instalado
+$swsConfigFiles = @(
+    "$reaperDir\sws-autocoloricon.ini",
+    "$reaperDir\SWS.ini",
+    "$env:APPDATA\REAPER\sws-autocoloricon.ini"
+)
+
 foreach ($dll in $swsDlls) {
     if (Test-Path $dll) {
         $swsInstalled = $true
@@ -139,8 +146,19 @@ foreach ($dll in $swsDlls) {
     }
 }
 
+# Si no se encontró la DLL, buscar archivos de configuración
+if (-not $swsInstalled) {
+    foreach ($ini in $swsConfigFiles) {
+        if (Test-Path $ini) {
+            $swsInstalled = $true
+            $foundSwsPath = $ini
+            break
+        }
+    }
+}
+
 if ($swsInstalled) {
-    Write-Success "SWS Extension detectada en: $foundSwsPath"
+    Write-Success "SWS Extension detectada (vía: $foundSwsPath)"
 } else {
     Write-Info "SWS Extension no detectada en las rutas habituales"
     
