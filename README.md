@@ -54,22 +54,29 @@ Si tocas en directo con REAPER y necesitas:
 
 ## 🚀 Instalación y Actualización
 
-### ⚡ Instalador Automático (Recomendado para Windows)
+### 📥 Descarga Directa (Sin Git)
+No necesitas saber usar Git ni clonar el repositorio. 
 
+1. Haz clic en el botón verde **`<> Code`** arriba a la derecha.
+2. Selecciona **`Download ZIP`**.
+3. Extrae el contenido del archivo ZIP en una carpeta de tu ordenador.
+
+### ⚡ Instalador Automático (Recomendado para Windows)
 El instalador configura todo por ti: archivos web, scripts Lua, detección de SWS y Command ID.
 
-1. **Descarga** o clona este repositorio.
+1. Abre la carpeta donde extrajiste el ZIP.
 2. Haz doble clic en **`install.bat`**.
 3. Sigue las instrucciones en pantalla.
 
 ### 🔄 Cómo Actualizar
-Si has descargado una nueva versión de la herramienta:
-1. Simplemente vuelve a ejecutar **`install.bat`**.
-2. El script detectará tu configuración anterior, actualizará los archivos y mantendrá tu Command ID automáticamente.
+Si sale una nueva versión:
+1. Descarga el nuevo ZIP y extráelo.
+2. Vuelve a ejecutar **`install.bat`**.
+3. El script detectará tu configuración anterior y actualizará los archivos manteniendo tu Command ID.
 
 ### 🍎 Mac / Linux
-1. Abre una terminal en la carpeta del proyecto.
-2. Ejecuta el instalador:
+1. Abre una terminal en la carpeta extraída.
+2. Ejecuta:
    ```bash
    chmod +x install.sh
    ./install.sh
