@@ -113,6 +113,24 @@ Write-Success "Carpeta de REAPER detectada: $reaperDir"
 $scriptsDir = "$reaperDir\Scripts"
 $wwwDir = "$reaperDir\reaper_www_root"
 $userPluginsDir = "$reaperDir\UserPlugins"
+$kbFile = "$reaperDir\reaper-kb.ini"
+
+# Función para intentar encontrar el Command ID automáticamente
+function Get-ScriptCommandID {
+    if (Test-Path $kbFile) {
+        Write-Info "Buscando Command ID en reaper-kb.ini..."
+        $kbContent = Get-Content $kbFile
+        # Buscar la línea que contiene nuestro script
+        # Formato: SCR 4 0 RS... "smooth_seeking_control_v3.lua" smooth_seeking_control_v3.lua
+        $line = $kbContent | Select-String "smooth_seeking_control_v3.lua" | Select-Object -First 1
+        
+        if ($line -and $line.ToString() -match 'RS[a-f0-9]{40}') {
+            $id = $matches[0]
+            return "_$id" # Añadir el prefijo necesario para la Web API
+        }
+    }
+    return $null
+}
 
 # ============================================================
 # PASO 1: Verificar/Instalar SWS Extension
@@ -253,80 +271,78 @@ if (Test-Path $luaScript) {
 }
 
 # ============================================================
-# PASO 4: Configurar REAPER (requiere interaccion del usuario)
+# PASO 4: Configurar REAPER
 # ============================================================
 
-Write-Step "Configuracion en REAPER (IMPORTANTE)..."
+Write-Step "Configuracion del Command ID..."
 
-Write-Host ""
-Write-Host "Ahora necesitamos registrar el script en REAPER." -ForegroundColor Yellow
-Write-Host "Por favor, sigue estos pasos:" -ForegroundColor Yellow
-Write-Host ""
+# Intentar detección automática primero
+$commandId = Get-ScriptCommandID
 
-Write-Host "1. Abre REAPER (si no esta abierto)" -ForegroundColor White
-Write-Host ""
+if ($commandId) {
+    Write-Success "Command ID detectado automaticamente: $commandId"
+} else {
+    Write-Info "No se pudo detectar el Command ID automaticamente."
+    Write-Host ""
+    Write-Host "Necesitamos registrar el script en REAPER para obtener su ID." -ForegroundColor Yellow
+    Write-Host "Por favor, sigue estos pasos:" -ForegroundColor Yellow
+    Write-Host ""
 
-$openReaper = Read-Host "REAPER esta abierto? (S/N)"
-if ($openReaper -ne "S" -and $openReaper -ne "s") {
-    Write-Info "Intentando abrir REAPER..."
-    
-    $reaperExe = "$env:ProgramFiles\REAPER\reaper.exe"
-    if (-not (Test-Path $reaperExe)) {
-        $reaperExe = "$env:ProgramFiles(x86)\REAPER\reaper.exe"
+    Write-Host "1. Abre REAPER (si no esta abierto)" -ForegroundColor White
+    Write-Host ""
+
+    $openReaper = Read-Host "REAPER esta abierto? (S/N)"
+    if ($openReaper -ne "S" -and $openReaper -ne "s") {
+        Write-Info "Intentando abrir REAPER..."
+        
+        $reaperExe = "$env:ProgramFiles\REAPER\reaper.exe"
+        if (-not (Test-Path $reaperExe)) {
+            $reaperExe = "$env:ProgramFiles(x86)\REAPER\reaper.exe"
+        }
+        
+        if (Test-Path $reaperExe) {
+            Start-Process $reaperExe
+            Write-Success "REAPER iniciado"
+            Start-Sleep -Seconds 3
+        } else {
+            Write-Info "Abre REAPER manualmente y continua"
+        }
     }
-    
-    if (Test-Path $reaperExe) {
-        Start-Process $reaperExe
-        Write-Success "REAPER iniciado"
-        Start-Sleep -Seconds 3
-    } else {
-        Write-Info "Abre REAPER manualmente y continua"
-    }
+
+    Write-Host ""
+    Write-Host "2. En REAPER:" -ForegroundColor White
+    Write-Host "   - Presiona Shift + / (o ve a Actions → Show action list)" -ForegroundColor Gray
+    Write-Host "   - Haz clic en 'New action...' → 'Load ReaScript...'" -ForegroundColor Gray
+    Write-Host "   - Selecciona el archivo:" -ForegroundColor Gray
+    Write-Host "     $destLuaScript" -ForegroundColor Cyan
+    Write-Host ""
+
+    Read-Host "Presiona Enter cuando hayas cargado el script"
+
+    Write-Host ""
+    Write-Host "3. Ahora copia el Command ID del script:" -ForegroundColor White
+    Write-Host "   - En la lista de acciones, busca 'smooth_seeking_control_v3'" -ForegroundColor Gray
+    Write-Host "   - Veras un ID como: _RS7D3C92BC..." -ForegroundColor Gray
+    Write-Host "   - Selecciona ese ID y copialo (Ctrl+C)" -ForegroundColor Gray
+    Write-Host ""
+
+    Write-Host "Pega el Command ID aqui (o presiona Enter para saltar):" -ForegroundColor Yellow
+    $commandId = Read-Host "Command ID"
 }
 
-Write-Host ""
-Write-Host "2. En REAPER:" -ForegroundColor White
-Write-Host "   - Presiona Shift + / (o ve a Actions → Show action list)" -ForegroundColor Gray
-Write-Host "   - Haz clic en 'New action...' → 'Load ReaScript...'" -ForegroundColor Gray
-Write-Host "   - Selecciona el archivo:" -ForegroundColor Gray
-Write-Host "     $destLuaScript" -ForegroundColor Cyan
-Write-Host ""
-
-Read-Host "Presiona Enter cuando hayas cargado el script"
-
-Write-Host ""
-Write-Host "3. Ahora copia el Command ID del script:" -ForegroundColor White
-Write-Host "   - En la lista de acciones, busca 'smooth_seeking_control_v3'" -ForegroundColor Gray
-Write-Host "   - Veras un ID como: _RS7D3C92BC..." -ForegroundColor Gray
-Write-Host "   - Selecciona ese ID y copialo (Ctrl+C)" -ForegroundColor Gray
-Write-Host ""
-
-Write-Host "Pega el Command ID aqui:" -ForegroundColor Yellow
-$commandId = Read-Host "Command ID"
-
 if ([string]::IsNullOrWhiteSpace($commandId)) {
-    Write-Error-Custom "No se proporciono un Command ID valido"
-    Write-Host ""
-    Write-Host "Puedes configurarlo manualmente mas tarde editando:" -ForegroundColor Yellow
-    Write-Host "$wwwDir\js\state.js" -ForegroundColor White
-    Write-Host ""
-    Write-Host "Busca la linea:" -ForegroundColor Yellow
-    Write-Host "  smoothSeekingScriptCmd: null," -ForegroundColor Gray
-    Write-Host ""
-    Write-Host "Y reemplaza 'null' con tu Command ID entre comillas:" -ForegroundColor Yellow
-    Write-Host "  smoothSeekingScriptCmd: '_RS7D3C92BC...'," -ForegroundColor Gray
-    Write-Host ""
+    Write-Info "No se proporciono un Command ID. Se mantendra la configuracion actual."
 } else {
     # Configurar Command ID en state.js
-    Write-Step "Configurando Command ID en state.js..."
+    Write-Step "Actualizando Command ID en state.js..."
     
     $stateFile = "$wwwDir\js\state.js"
     
     if (Test-Path $stateFile) {
         $content = Get-Content $stateFile -Raw
         
-        # Reemplazar la linea del Command ID
-        $pattern = 'smoothSeekingScriptCmd:\s*null'
+        # Reemplazar tanto si es null como si tiene otro ID anterior
+        $pattern = 'smoothSeekingScriptCmd:\s*[^,]+'
         $replacement = "smoothSeekingScriptCmd: '$commandId'"
         
         $newContent = $content -replace $pattern, $replacement
@@ -335,7 +351,7 @@ if ([string]::IsNullOrWhiteSpace($commandId)) {
         
         Write-Success "Command ID configurado correctamente en state.js"
     } else {
-        Write-Error-Custom "No se encontro el archivo state.js"
+        Write-Error-Custom "No se encontro el archivo state.js en $wwwDir"
     }
 }
 
