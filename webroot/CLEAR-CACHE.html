@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Limpiar Caché</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 20px;
+      max-width: 600px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .instructions {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: left;
+    }
+    .instructions h3 {
+      margin-top: 0;
+    }
+    .instructions ol {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    .instructions li {
+      margin: 10px 0;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .warning {
+      background: rgba(255, 152, 0, 0.3);
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧹 Limpiar Caché del Navegador</h1>
+    
+    <p>Si estás viendo errores sobre archivos antiguos (osc.js, getTimelineMode, etc.), necesitas limpiar el caché del navegador.</p>
+    
+    <div class="instructions">
+      <h3>📋 Instrucciones por navegador:</h3>
+      
+      <h4>Chrome / Edge:</h4>
+      <ol>
+        <li>Presiona <strong>Ctrl + Shift + Delete</strong></li>
+        <li>Selecciona "Todo el tiempo"</li>
+        <li>Marca "Imágenes y archivos en caché"</li>
+        <li>Click en "Borrar datos"</li>
+      </ol>
+      
+      <h4>Firefox:</h4>
+      <ol>
+        <li>Presiona <strong>Ctrl + Shift + Delete</strong></li>
+        <li>Selecciona "Todo"</li>
+        <li>Marca "Caché"</li>
+        <li>Click en "Aceptar"</li>
+      </ol>
+      
+      <h4>Safari (iPad/Mac):</h4>
+      <ol>
+        <li>Ajustes → Safari</li>
+        <li>"Borrar historial y datos de sitios web"</li>
+        <li>Confirmar</li>
+      </ol>
+    </div>
+    
+    <div class="warning">
+      <strong>⚠️ Método rápido (solo para esta página):</strong><br>
+      Presiona <strong>Ctrl + F5</strong> o <strong>Shift + F5</strong> para forzar recarga
+    </div>
+    
+    <button onclick="clearAndReload()">🔄 Limpiar e Ir a la App</button>
+    <button onclick="window.location.href='index.html'">➡️ Ir a la App (sin limpiar)</button>
+  </div>
+  
+  <script>
+    function clearAndReload() {
+      // Intentar limpiar caché con API moderna
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (let name of names) {
+            caches.delete(name);
+          }
+        });
+      }
+      
+      // Forzar recarga sin caché
+      alert('Caché limpiado.\n\nAhora presiona Ctrl + F5 en la siguiente página para forzar recarga completa.');
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

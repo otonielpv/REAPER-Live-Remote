@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Reaper Live Remote - Canción</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <button id="btn-back" class="icon-btn" title="Volver">
+        ← Atrás
+      </button>
+      <h1 id="song-title">Canción</h1>
+      <div class="header-actions">
+        <button id="btn-refresh" class="icon-btn" title="Recargar">
+          🔄
+        </button>
+      </div>
+    </header>
+
+    <!-- Modo de salto -->
+    <div id="jump-mode-container" class="jump-mode-container">
+      <!-- Se llenará con JavaScript -->
+    </div>
+
+    <!-- Configuración de compases -->
+    <div id="bar-count-container" class="bar-count-container">
+      <!-- Se llenará con JavaScript -->
+    </div>
+
+    <!-- Transporte -->
+    <div id="transport-container" class="transport-container">
+      <!-- Se llenará con JavaScript -->
+    </div>
+
+    <!-- Botón de cancelar salto (inicialmente oculto) -->
+    <div class="cancel-jump-container">
+      <button id="cancel-jump-btn" class="cancel-jump-btn" style="display: none;">
+        🚫 Cancelar Salto
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="sections">Secciones</button>
+      <button class="tab-btn" data-tab="mixer">Mezcla</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <!-- Tab: Secciones -->
+      <div id="tab-sections" class="tab-content active">
+        <div id="sections-list" class="sections-list">
+          <!-- Se llenará con JavaScript -->
+        </div>
+      </div>
+
+      <!-- Tab: Mezcla -->
+      <div id="tab-mixer" class="tab-content">
+        <div id="mixer-faders" class="mixer-faders">
+          <!-- Se llenará con JavaScript -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="connection-status">
+        <span id="status-indicator" class="status-indicator"></span>
+        <span id="status-text">Conectando...</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module">
+    import * as api from './js/api.js';
+    import * as state from './js/state.js';
+    import * as ui from './js/ui.js';
+    import * as utils from './js/utils.js';
+
+    // Elementos del DOM
+    const songTitle = document.getElementById('song-title');
+    const btnBack = document.getElementById('btn-back');
+    const btnRefresh = document.getElementById('btn-refresh');
+    const jumpModeContainer = document.getElementById('jump-mode-container');
+    const barCountContainer = document.getElementById('bar-count-container');
+    const transportContainer = document.getElementById('transport-container');
+    const sectionsListContainer = document.getElementById('sections-list');
+    const mixerFadersContainer = document.getElementById('mixer-faders');
+    const statusIndicator = document.getElementById('status-indicator');
+    const statusText = document.getElementById('status-text');
+
+    // Obtener songId de la URL
+    const songId = parseInt(utils.getQueryParam('songId'));
+    
+    if (!songId) {
+      window.location.href = 'index.html';
+    }
+
+    /**
+     * Cargar datos de la canción
+     */
+    async function loadSongData() {
+      try {
+        ui.showLoading(sectionsListContainer);
+        ui.showLoading(mixerFadersContainer);
+        
+        // Cargar marcadores, regiones y pistas en paralelo
+        const [markers, regions, tracks] = await Promise.all([
+          api.getMarkers(),
+          api.getRegions(),
+          api.getTracks()
+        ]);
+        
+        // Actualizar estado
+        state.setMarkers(markers);
+        state.setRegions(regions);
+        state.setTracks(tracks);
+        state.setCurrentSong(songId);
+        
+        // Encontrar la canción (puede ser marker o region según modo)
+        const song = state.getCurrentSong();
+        if (!song) {
+          throw new Error('Canción no encontrada');
+        }
+        
+        // Actualizar título
+        songTitle.textContent = song.name;
+        
+        // Obtener secciones de esta canción (puede ser regiones o marcadores según modo)
+        const songSections = state.getSectionsForSong(songId);
+        
+        // Renderizar UI
+        renderUI(songSections, tracks);
+        
+        // Actualizar conexión
+        updateConnectionStatus(true);
+        
+        console.log(`✅ Canción cargada: ${song.name} (${songSections.length} secciones, ${tracks.length} pistas)`);
+        
+      } catch (error) {
+        console.error('Error cargando canción:', error);
+        ui.showError('Error cargando datos de la canción');
+        updateConnectionStatus(false);
+      }
+    }
+
+    /**
+     * Renderizar toda la UI
+     */
+    function renderUI(regions, tracks) {
+      // Modo de salto
+      ui.renderJumpModeToggle(jumpModeContainer, state.state.jumpMode);
+      
+      // Selector de compases (siempre visible)
+      ui.renderMixerOptions(barCountContainer);
+      
+      // Transporte
+      ui.renderTransport(transportContainer);
+      
+      // Secciones (ya no necesita jumpMode, lo obtiene internamente)
+      ui.renderSections(sectionsListContainer, regions);
+      
+      // Mezcla
+      ui.renderMixerFaders(mixerFadersContainer, tracks);
+    }
+
+    /**
+     * Actualizar indicador de estado de conexión
+     */
+    function updateConnectionStatus(connected) {
+      if (connected) {
+        statusIndicator.className = 'status-indicator connected';
+        statusText.textContent = 'Conectado a REAPER';
+      } else {
+        statusIndicator.className = 'status-indicator disconnected';
+        statusText.textContent = 'Sin conexión';
+      }
+    }
+
+    /**
+     * Cambiar de tab
+     */
+    function switchTab(tabName) {
+      // Actualizar botones
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+      });
+      
+      // Actualizar contenido
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === `tab-${tabName}`);
+      });
+      
+      // Controlar polling del mezclador
+      if (tabName === 'mixer') {
+        // Iniciar polling cuando entramos a la pestaña de mezcla
+        if (!api.isPolling()) {
+          console.log('🎚️ Iniciando sincronización del mezclador...');
+          api.startPolling({
+            onTracksUpdate: (tracks) => {
+              // Actualizar estado
+              state.setTracks(tracks);
+              // Actualizar UI sin recrear faders
+              ui.updateMixerFaders(tracks);
+            }
+          }, 500); // Cada 500ms
+        }
+      } else {
+        // Detener polling cuando salimos de la pestaña de mezcla
+        if (api.isPolling()) {
+          console.log('🎚️ Deteniendo sincronización del mezclador');
+          api.stopPolling();
+        }
+      }
+    }
+
+    /**
+     * Event listeners
+     */
+    btnBack.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    btnRefresh.addEventListener('click', () => {
+      loadSongData();
+    });
+
+    // Botón de cancelar salto
+    const cancelJumpBtn = document.getElementById('cancel-jump-btn');
+    if (cancelJumpBtn) {
+      cancelJumpBtn.addEventListener('click', () => {
+        ui.handleCancelJump();
+      });
+    }
+
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.getAttribute('data-tab');
+        switchTab(tabName);
+      });
+    });
+    
+    // Detener polling cuando se cierra/oculta la página
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        if (api.isPolling()) {
+          console.log('👋 Página oculta, deteniendo polling');
+          api.stopPolling();
+        }
+      } else {
+        // Si volvemos a la página y estamos en la pestaña mixer, reiniciar polling
+        const activeMixer = document.querySelector('.tab-content#tab-mixer.active');
+        if (activeMixer && !api.isPolling()) {
+          console.log('👁️ Página visible, reiniciando polling del mezclador');
+          api.startPolling({
+            onTracksUpdate: (tracks) => {
+              state.setTracks(tracks);
+              ui.updateMixerFaders(tracks);
+            }
+          }, 500);
+        }
+      }
+    });
+
+    // Cargar al iniciar
+    loadSongData();
+    
+    // Variable para rastrear la sección activa anterior
+    let previousSectionId = null;
+    
+    // Polling de estado (cada 500ms)
+    setInterval(async () => {
+      if (document.visibilityState === 'visible') {
+        try {
+          const playState = await api.getPlayState();
+          state.updatePlayState(playState.isPlaying, playState.pos);
+          
+          // Detectar en qué sección (marcador) estamos basándonos en la posición
+          const currentPos = playState.pos;
+          
+          // Obtener secciones de la canción actual
+          const songSections = state.getSectionsForSong(songId);
+          
+          // Buscar marcador más cercano que no hayamos pasado
+          let currentSection = null;
+          for (let i = songSections.length - 1; i >= 0; i--) {
+            if (currentPos >= songSections[i].pos) {
+              currentSection = songSections[i];
+              break;
+            }
+          }
+          
+          // Si cambiamos de sección, actualizar UI
+          if (currentSection) {
+            if (currentSection.id !== previousSectionId) {
+              console.log(`📍 Cambio de sección detectado: "${currentSection.name}" (${currentSection.id})`);
+              previousSectionId = currentSection.id;
+              state.setCurrentRegion(currentSection.id);
+              
+              // Actualizar resaltado visual usando la función exportada de ui.js
+              ui.highlightActiveSection(currentSection.id);
+              
+              // Si llegamos a la sección pendiente, el salto se completó
+              const pendingJump = state.getPendingJump();
+              if (pendingJump && pendingJump.sectionId === currentSection.id) {
+                console.log('✅ Salto programado completado');
+                state.setPendingJump(null, null);
+              }
+            }
+          } else if (previousSectionId !== null) {
+            // Ya no estamos en ninguna sección
+            console.log('📍 Fuera de secciones');
+            previousSectionId = null;
+            ui.highlightActiveSection(null);
+          }
+          
+        } catch (error) {
+          // Silencioso en polling
+        }
+      }
+    }, 500);
+    
+  </script>
+</body>
+</html>

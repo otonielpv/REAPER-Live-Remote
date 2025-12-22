@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Reaper Live Remote - Canciones</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <h1>🎸 Canciones</h1>
+      <div class="header-actions">
+        <button id="btn-refresh" class="icon-btn" title="Recargar">
+          🔄
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <div id="song-list" class="song-list">
+        <!-- Se llenará dinámicamente con JavaScript -->
+      </div>
+    </main>
+
+    <!-- Footer con info de conexión -->
+    <footer class="app-footer">
+      <div class="connection-status">
+        <span id="status-indicator" class="status-indicator"></span>
+        <span id="status-text">Conectando...</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module">
+    import * as api from './js/api.js';
+    import * as state from './js/state.js';
+    import * as ui from './js/ui.js';
+    import * as utils from './js/utils.js';
+
+    // Elementos del DOM
+    const songListContainer = document.getElementById('song-list');
+    const btnRefresh = document.getElementById('btn-refresh');
+    const statusIndicator = document.getElementById('status-indicator');
+    const statusText = document.getElementById('status-text');
+
+    /**
+     * Cargar canciones desde REAPER
+     */
+    async function loadSongs() {
+      try {
+        ui.showLoading(songListContainer);
+        
+        // Inicializar API
+        await api.init();
+        
+        // Cargar regiones (canciones)
+        const regions = await api.getRegions();
+        console.log('📦 Regiones recibidas:', regions);
+        
+        // Actualizar estado
+        state.setRegions(regions);
+        
+        // Obtener lista de canciones
+        const songs = state.getSongs();
+        console.log('🎵 Canciones procesadas:', songs);
+        
+        // Renderizar lista
+        ui.renderSongList(songListContainer, songs);
+        
+        // Actualizar estado de conexión
+        updateConnectionStatus(true);
+        
+        console.log(`✅ Cargadas ${songs.length} canciones`);
+        
+      } catch (error) {
+        console.error('❌ Error cargando canciones:', error);
+        songListContainer.innerHTML = `
+          <div class="error-state">
+            <p>❌ Error de conexión</p>
+            <p class="hint">Verifica que REAPER esté abierto y el servidor web habilitado</p>
+            <p class="hint">Conectando a: http://192.168.1.39:8080</p>
+            <button class="btn-retry" onclick="window.location.reload()">Reintentar</button>
+          </div>
+        `;
+        updateConnectionStatus(false);
+      }
+    }
+
+    /**
+     * Actualizar indicador de estado de conexión
+     */
+    function updateConnectionStatus(connected) {
+      if (connected) {
+        statusIndicator.className = 'status-indicator connected';
+        statusText.textContent = 'Conectado a REAPER';
+      } else {
+        statusIndicator.className = 'status-indicator disconnected';
+        statusText.textContent = 'Sin conexión';
+      }
+    }
+
+    /**
+     * Event listeners
+     */
+    btnRefresh.addEventListener('click', () => {
+      loadSongs();
+    });
+
+    // Cargar al iniciar
+    loadSongs();
+    
+    // Recargar periódicamente (cada 30 segundos)
+    setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadSongs();
+      }
+    }, 30000);
+    
+  </script>
+</body>
+</html>

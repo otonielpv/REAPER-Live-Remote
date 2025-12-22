@@ -1,0 +1,53 @@
+{
+  "markers": [
+    { "id": 1, "name": "Canción 1", "pos": 0.0 },
+    { "id": 2, "name": "La Balada", "pos": 180.5 },
+    { "id": 3, "name": "Rock Final", "pos": 360.0 },
+    { "id": 4, "name": "El Blues", "pos": 540.0 }
+  ],
+  "regions": [
+    { "id": 101, "name": "Intro", "start": 0.0, "end": 15.0 },
+    { "id": 102, "name": "Verso", "start": 15.0, "end": 45.0 },
+    { "id": 103, "name": "Coro", "start": 45.0, "end": 75.0 },
+    { "id": 104, "name": "Puente", "start": 75.0, "end": 105.0 },
+    { "id": 105, "name": "Coro", "start": 105.0, "end": 135.0 },
+    { "id": 106, "name": "Final", "start": 135.0, "end": 180.0 },
+    
+    { "id": 201, "name": "Intro", "start": 180.5, "end": 200.0 },
+    { "id": 202, "name": "Verso", "start": 200.0, "end": 240.0 },
+    { "id": 203, "name": "Coro", "start": 240.0, "end": 280.0 },
+    { "id": 204, "name": "Verso", "start": 280.0, "end": 320.0 },
+    { "id": 205, "name": "Final", "start": 320.0, "end": 360.0 },
+    
+    { "id": 301, "name": "Intro", "start": 360.0, "end": 380.0 },
+    { "id": 302, "name": "Verso", "start": 380.0, "end": 420.0 },
+    { "id": 303, "name": "Coro", "start": 420.0, "end": 460.0 },
+    { "id": 304, "name": "Solo", "start": 460.0, "end": 500.0 },
+    { "id": 305, "name": "Coro", "start": 500.0, "end": 540.0 },
+    
+    { "id": 401, "name": "Intro", "start": 540.0, "end": 560.0 },
+    { "id": 402, "name": "Verso", "start": 560.0, "end": 600.0 },
+    { "id": 403, "name": "Puente", "start": 600.0, "end": 640.0 },
+    { "id": 404, "name": "Final", "start": 640.0, "end": 680.0 }
+  ],
+  "tracks": [
+    { "id": 1, "name": "Click", "vol": 0.7, "pan": 0.0, "mute": false, "isVisible": true },
+    { "id": 2, "name": "Guía", "vol": 0.8, "pan": 0.0, "mute": false, "isVisible": true },
+    { "id": 3, "name": "Batería", "vol": 0.85, "pan": 0.0, "mute": false, "isVisible": true },
+    { "id": 4, "name": "Bajo", "vol": 0.75, "pan": 0.0, "mute": false, "isVisible": true },
+    { "id": 5, "name": "Guitarra L", "vol": 0.8, "pan": -0.5, "mute": false, "isVisible": true },
+    { "id": 6, "name": "Guitarra R", "vol": 0.8, "pan": 0.5, "mute": false, "isVisible": true },
+    { "id": 7, "name": "Teclado", "vol": 0.6, "pan": 0.0, "mute": false, "isVisible": true },
+    { "id": 8, "name": "Coros", "vol": 0.65, "pan": 0.0, "mute": false, "isVisible": true }
+  ],
+  "playState": {
+    "isPlaying": false,
+    "pos": 0.0,
+    "currentRegionId": null
+  },
+  "tempo": {
+    "bpm": 120,
+    "sigNum": 4,
+    "sigDen": 4
+  }
+}

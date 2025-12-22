@@ -1,0 +1,361 @@
+# ============================================================
+# REAPER Live Remote - Instalador Automatico
+# ============================================================
+# Este script instala automaticamente todo lo necesario:
+# 1. SWS Extension (si no esta instalada)
+# 2. Script Lua en REAPER
+# 3. Archivos web en reaper_www_root
+# 4. Configura el Command ID automaticamente
+# ============================================================
+
+param(
+    [switch]$SkipSWS = $false  # Usar -SkipSWS para omitir instalacion de SWS
+)
+
+$ErrorActionPreference = "Stop"
+
+# Colores y formato
+function Write-Title {
+    param($Text)
+    Write-Host ""
+    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host "  $Text" -ForegroundColor Cyan
+    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host ""
+}
+
+function Write-Success {
+    param($Text)
+    Write-Host "[OK] $Text" -ForegroundColor Green
+}
+
+function Write-Info {
+    param($Text)
+    Write-Host "[i] $Text" -ForegroundColor Yellow
+}
+
+function Write-Error-Custom {
+    param($Text)
+    Write-Host "[ERROR] $Text" -ForegroundColor Red
+}
+
+function Write-Step {
+    param($Text)
+    Write-Host ""
+    Write-Host "> $Text" -ForegroundColor Cyan
+}
+
+# ============================================================
+# PASO 0: Verificaciones iniciales
+# ============================================================
+
+Write-Title "REAPER Live Remote - Instalador Automatico"
+
+Write-Info "Este instalador configurara automaticamente:"
+Write-Host "  - SWS Extension (si no esta instalada)" -ForegroundColor White
+Write-Host "  - Script Lua de control de saltos" -ForegroundColor White
+Write-Host "  - Interfaz web en REAPER" -ForegroundColor White
+Write-Host "  - Configuracion automatica del Command ID" -ForegroundColor White
+Write-Host ""
+
+$continue = Read-Host "Deseas continuar? (S/N)"
+if ($continue -ne "S" -and $continue -ne "s") {
+    Write-Host "Instalacion cancelada." -ForegroundColor Yellow
+    exit 0
+}
+
+# Verificar que REAPER este instalado
+Write-Step "Verificando instalacion de REAPER..."
+
+$reaperPaths = @(
+    "$env:APPDATA\REAPER",
+    "$env:ProgramFiles\REAPER",
+    "$env:ProgramFiles(x86)\REAPER"
+)
+
+$reaperDir = $null
+foreach ($path in $reaperPaths) {
+    if (Test-Path $path) {
+        $reaperDir = $path
+        break
+    }
+}
+
+if (-not $reaperDir) {
+    Write-Error-Custom "No se encontro REAPER instalado en tu sistema."
+    Write-Host ""
+    Write-Host "Por favor, instala REAPER desde: https://www.reaper.fm" -ForegroundColor Yellow
+    Write-Host ""
+    Read-Host "Presiona Enter para salir"
+    exit 1
+}
+
+Write-Success "REAPER encontrado en: $reaperDir"
+
+# Detectar carpeta de scripts
+$scriptsDir = "$env:APPDATA\REAPER\Scripts"
+$wwwDir = "$env:APPDATA\REAPER\reaper_www_root"
+
+# ============================================================
+# PASO 1: Verificar/Instalar SWS Extension
+# ============================================================
+
+Write-Step "Verificando SWS Extension..."
+
+$swsInstalled = $false
+$swsDll = "$env:APPDATA\REAPER\UserPlugins\reaper_sws64.dll"
+$swsDll32 = "$env:APPDATA\REAPER\UserPlugins\reaper_sws.dll"
+
+if ((Test-Path $swsDll) -or (Test-Path $swsDll32)) {
+    $swsInstalled = $true
+    Write-Success "SWS Extension ya esta instalada"
+} else {
+    Write-Info "SWS Extension no esta instalada"
+    
+    if ($SkipSWS) {
+        Write-Info "Saltando instalacion de SWS (modo -SkipSWS)"
+        Write-Host ""
+        Write-Host "NOTA: Los modos de salto avanzados no funcionaran sin SWS." -ForegroundColor Yellow
+        Write-Host "Puedes instalar SWS manualmente desde: https://www.sws-extension.org" -ForegroundColor Yellow
+    } else {
+        Write-Host ""
+        Write-Host "SWS Extension es necesaria para los modos de salto avanzados." -ForegroundColor Yellow
+        Write-Host ""
+        
+        $installSWS = Read-Host "Deseas descargar e instalar SWS ahora? (S/N)"
+        
+        if ($installSWS -eq "S" -or $installSWS -eq "s") {
+            Write-Info "Abriendo pagina de descarga de SWS Extension..."
+            Write-Host ""
+            Write-Host "Por favor:" -ForegroundColor Yellow
+            Write-Host "1. Descarga el instalador para tu version de Windows" -ForegroundColor White
+            Write-Host "2. Ejecuta el instalador" -ForegroundColor White
+            Write-Host "3. Reinicia REAPER si esta abierto" -ForegroundColor White
+            Write-Host "4. Vuelve aqui y presiona Enter para continuar" -ForegroundColor White
+            Write-Host ""
+            
+            Start-Process "https://www.sws-extension.org/download/pre-release/"
+            
+            Read-Host "Presiona Enter cuando hayas instalado SWS"
+            
+            # Verificar de nuevo
+            if ((Test-Path $swsDll) -or (Test-Path $swsDll32)) {
+                Write-Success "SWS Extension instalada correctamente"
+                $swsInstalled = $true
+            } else {
+                Write-Info "No se detecto SWS, pero continuaremos con la instalacion"
+                Write-Host "(Puedes instalarla mas tarde desde: https://www.sws-extension.org)" -ForegroundColor Gray
+            }
+        } else {
+            Write-Info "Saltando instalacion de SWS"
+            Write-Host "(Puedes instalarla mas tarde desde: https://www.sws-extension.org)" -ForegroundColor Gray
+        }
+    }
+}
+
+# ============================================================
+# PASO 2: Copiar archivos web a reaper_www_root
+# ============================================================
+
+Write-Step "Instalando interfaz web..."
+
+# Crear directorio si no existe
+if (-not (Test-Path $wwwDir)) {
+    New-Item -ItemType Directory -Force -Path $wwwDir | Out-Null
+    Write-Info "Carpeta creada: $wwwDir"
+}
+
+# Backup si ya existe
+if (Test-Path "$wwwDir\index.html") {
+    $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    $backupDir = "$wwwDir`_backup_$timestamp"
+    
+    Write-Info "Encontrada instalacion previa, creando backup..."
+    Copy-Item -Path $wwwDir -Destination $backupDir -Recurse -Force
+    Write-Success "Backup creado en: $backupDir"
+}
+
+# Copiar archivos
+Copy-Item -Path "webroot\*" -Destination $wwwDir -Recurse -Force
+Write-Success "Archivos web instalados en: $wwwDir"
+
+# ============================================================
+# PASO 3: Copiar script Lua a carpeta de Scripts
+# ============================================================
+
+Write-Step "Instalando script Lua de control..."
+
+# Crear directorio si no existe
+if (-not (Test-Path $scriptsDir)) {
+    New-Item -ItemType Directory -Force -Path $scriptsDir | Out-Null
+    Write-Info "Carpeta de scripts creada: $scriptsDir"
+}
+
+$luaScript = "reaper-scripts\smooth_seeking_control_v3.lua"
+$destLuaScript = "$scriptsDir\smooth_seeking_control_v3.lua"
+
+if (Test-Path $luaScript) {
+    Copy-Item -Path $luaScript -Destination $destLuaScript -Force
+    Write-Success "Script Lua copiado a: $destLuaScript"
+} else {
+    Write-Error-Custom "No se encontro el script Lua en: $luaScript"
+    exit 1
+}
+
+# ============================================================
+# PASO 4: Configurar REAPER (requiere interaccion del usuario)
+# ============================================================
+
+Write-Step "Configuracion en REAPER (IMPORTANTE)..."
+
+Write-Host ""
+Write-Host "Ahora necesitamos registrar el script en REAPER." -ForegroundColor Yellow
+Write-Host "Por favor, sigue estos pasos:" -ForegroundColor Yellow
+Write-Host ""
+
+Write-Host "1. Abre REAPER (si no esta abierto)" -ForegroundColor White
+Write-Host ""
+
+$openReaper = Read-Host "REAPER esta abierto? (S/N)"
+if ($openReaper -ne "S" -and $openReaper -ne "s") {
+    Write-Info "Intentando abrir REAPER..."
+    
+    $reaperExe = "$env:ProgramFiles\REAPER\reaper.exe"
+    if (-not (Test-Path $reaperExe)) {
+        $reaperExe = "$env:ProgramFiles(x86)\REAPER\reaper.exe"
+    }
+    
+    if (Test-Path $reaperExe) {
+        Start-Process $reaperExe
+        Write-Success "REAPER iniciado"
+        Start-Sleep -Seconds 3
+    } else {
+        Write-Info "Abre REAPER manualmente y continua"
+    }
+}
+
+Write-Host ""
+Write-Host "2. En REAPER:" -ForegroundColor White
+Write-Host "   - Presiona Shift + / (o ve a Actions → Show action list)" -ForegroundColor Gray
+Write-Host "   - Haz clic en 'New action...' → 'Load ReaScript...'" -ForegroundColor Gray
+Write-Host "   - Selecciona el archivo:" -ForegroundColor Gray
+Write-Host "     $destLuaScript" -ForegroundColor Cyan
+Write-Host ""
+
+Read-Host "Presiona Enter cuando hayas cargado el script"
+
+Write-Host ""
+Write-Host "3. Ahora copia el Command ID del script:" -ForegroundColor White
+Write-Host "   - En la lista de acciones, busca 'smooth_seeking_control_v3'" -ForegroundColor Gray
+Write-Host "   - Veras un ID como: _RS7D3C92BC..." -ForegroundColor Gray
+Write-Host "   - Selecciona ese ID y copialo (Ctrl+C)" -ForegroundColor Gray
+Write-Host ""
+
+Write-Host "Pega el Command ID aqui:" -ForegroundColor Yellow
+$commandId = Read-Host "Command ID"
+
+if ([string]::IsNullOrWhiteSpace($commandId)) {
+    Write-Error-Custom "No se proporciono un Command ID valido"
+    Write-Host ""
+    Write-Host "Puedes configurarlo manualmente mas tarde editando:" -ForegroundColor Yellow
+    Write-Host "$wwwDir\js\state.js" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Busca la linea:" -ForegroundColor Yellow
+    Write-Host "  smoothSeekingScriptCmd: null," -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "Y reemplaza 'null' con tu Command ID entre comillas:" -ForegroundColor Yellow
+    Write-Host "  smoothSeekingScriptCmd: '_RS7D3C92BC...'," -ForegroundColor Gray
+    Write-Host ""
+} else {
+    # Configurar Command ID en state.js
+    Write-Step "Configurando Command ID en state.js..."
+    
+    $stateFile = "$wwwDir\js\state.js"
+    
+    if (Test-Path $stateFile) {
+        $content = Get-Content $stateFile -Raw
+        
+        # Reemplazar la linea del Command ID
+        $pattern = 'smoothSeekingScriptCmd:\s*null'
+        $replacement = "smoothSeekingScriptCmd: '$commandId'"
+        
+        $newContent = $content -replace $pattern, $replacement
+        
+        Set-Content -Path $stateFile -Value $newContent -Encoding UTF8
+        
+        Write-Success "Command ID configurado correctamente en state.js"
+    } else {
+        Write-Error-Custom "No se encontro el archivo state.js"
+    }
+}
+
+# ============================================================
+# PASO 5: Instrucciones finales
+# ============================================================
+
+Write-Title "Instalacion completada!"
+
+Write-Success "Todos los archivos han sido instalados correctamente"
+Write-Host ""
+
+Write-Host "============================================================" -ForegroundColor Yellow
+Write-Host "  uLTIMO PASO: Configurar servidor web en REAPER" -ForegroundColor Yellow
+Write-Host "============================================================" -ForegroundColor Yellow
+Write-Host ""
+
+Write-Host "1. En REAPER, ve a:" -ForegroundColor White
+Write-Host "   Preferences → Control/OSC/Web" -ForegroundColor Cyan
+Write-Host ""
+
+Write-Host "2. Marca la casilla:" -ForegroundColor White
+Write-Host "   [X] Enable web interface" -ForegroundColor Cyan
+Write-Host ""
+
+Write-Host "3. Configura:" -ForegroundColor White
+Write-Host "   - Puerto: 8080" -ForegroundColor Cyan
+Write-Host "   - Usuario: (opcional, para seguridad)" -ForegroundColor Cyan
+Write-Host "   - Contrasena: (opcional, para seguridad)" -ForegroundColor Cyan
+Write-Host ""
+
+Write-Host "4. Haz clic en OK" -ForegroundColor White
+Write-Host ""
+
+Write-Host "============================================================" -ForegroundColor Green
+Write-Host "  Como conectar desde tu tablet?" -ForegroundColor Green
+Write-Host "============================================================" -ForegroundColor Green
+Write-Host ""
+
+Write-Host "Tu IP local es:" -ForegroundColor Yellow
+$localIP = Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -notlike "*Loopback*" -and $_.IPAddress -like "192.168.*"} | Select-Object -First 1
+
+if ($localIP) {
+    $ipAddress = $localIP.IPAddress
+    Write-Host "  http://$ipAddress`:8080" -ForegroundColor Cyan -BackgroundColor Black
+    Write-Host ""
+    Write-Host "En tu tablet:" -ForegroundColor White
+    Write-Host "  1. Conectate a la misma red WiFi" -ForegroundColor Gray
+    Write-Host "  2. Abre el navegador" -ForegroundColor Gray
+    Write-Host "  3. Ve a: http://$ipAddress`:8080" -ForegroundColor Gray
+} else {
+    Write-Host "  No se pudo detectar automaticamente" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Para encontrar tu IP:" -ForegroundColor White
+    Write-Host "  1. Abre CMD" -ForegroundColor Gray
+    Write-Host "  2. Ejecuta: ipconfig" -ForegroundColor Gray
+    Write-Host "  3. Busca 'IPv4 Address' (algo como 192.168.x.x)" -ForegroundColor Gray
+}
+
+Write-Host ""
+Write-Host "============================================================" -ForegroundColor Magenta
+Write-Host "  Documentacion y soporte" -ForegroundColor Magenta
+Write-Host "============================================================" -ForegroundColor Magenta
+Write-Host ""
+Write-Host "README.md - Guia completa de uso" -ForegroundColor White
+Write-Host "docs/ - Documentacion tecnica" -ForegroundColor White
+Write-Host ""
+
+Write-Host "Listo para tocar en vivo!" -ForegroundColor Green
+Write-Host ""
+
+Read-Host "Presiona Enter para salir"
+

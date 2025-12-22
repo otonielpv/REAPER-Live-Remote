@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Reaper Live Remote - Test MOCK</title>
+  <link rel="stylesheet" href="css/app.css">
+  
+  <!-- Activar modo MOCK -->
+  <script>
+    window.MOCK = true;
+    console.log('🔧 Modo MOCK activado - usando datos de tests/mock-api.json');
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <h1>🧪 Reaper Live Remote - DEMO</h1>
+      <div class="header-actions">
+        <button onclick="location.href='index.html'" class="icon-btn">
+          🏠 Inicio
+        </button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        <div style="background: var(--color-bg-secondary); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+          <h2 style="margin-bottom: 16px;">✅ Modo de desarrollo activado</h2>
+          <p style="color: var(--color-text-secondary); margin-bottom: 16px;">
+            Esta versión funciona completamente sin REAPER usando datos simulados.
+          </p>
+          
+          <div style="background: var(--color-bg-tertiary); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+            <h3 style="font-size: 16px; margin-bottom: 8px;">📊 Datos de prueba disponibles:</h3>
+            <ul style="color: var(--color-text-secondary); line-height: 1.8; list-style: none; padding-left: 0;">
+              <li>✅ 4 canciones de ejemplo</li>
+              <li>✅ Múltiples secciones (Intro, Verso, Coro, etc.)</li>
+              <li>✅ 8 pistas con controles completos</li>
+              <li>✅ Controles de transporte</li>
+              <li>✅ Modo de salto configurable</li>
+            </ul>
+          </div>
+
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button onclick="location.href='index.html'" 
+                    style="flex: 1; min-width: 200px; padding: 16px 24px; background: var(--color-primary); 
+                           color: white; border-radius: 8px; font-size: 16px; font-weight: 600;
+                           cursor: pointer; transition: all 0.2s;"
+                    onmouseover="this.style.background='var(--color-primary-hover)'"
+                    onmouseout="this.style.background='var(--color-primary)'">
+              🎵 Ver Lista de Canciones
+            </button>
+            
+            <button onclick="location.href='song.html?songId=1'" 
+                    style="flex: 1; min-width: 200px; padding: 16px 24px; background: var(--color-success); 
+                           color: white; border-radius: 8px; font-size: 16px; font-weight: 600;
+                           cursor: pointer; transition: all 0.2s;"
+                    onmouseover="this.style.background='#66bb6a'"
+                    onmouseout="this.style.background='var(--color-success)'">
+              🎸 Ir a "Canción 1" (demo)
+            </button>
+          </div>
+        </div>
+
+        <div style="background: var(--color-bg-secondary); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+          <h2 style="margin-bottom: 16px;">🎯 Qué puedes probar:</h2>
+          <ul style="color: var(--color-text-secondary); line-height: 2;">
+            <li><strong>Selector de canciones:</strong> Navega entre diferentes canciones</li>
+            <li><strong>Secciones:</strong> Click en secciones (Intro, Verso, Coro...)</li>
+            <li><strong>Modo de salto:</strong> Cambia entre "Inmediato" y "Al compás"</li>
+            <li><strong>Transporte:</strong> Botones Play/Stop/Ir al inicio</li>
+            <li><strong>Mezcla:</strong> Tab "Mezcla" - ajusta volumen, pan y mute</li>
+            <li><strong>Responsive:</strong> Redimensiona la ventana para ver diseño adaptativo</li>
+          </ul>
+        </div>
+
+        <div style="background: var(--color-warning); color: var(--color-bg); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+          <h2 style="margin-bottom: 16px; color: var(--color-bg);">⚠️ Nota importante</h2>
+          <p style="margin-bottom: 12px; color: var(--color-bg);">
+            <strong>Los cambios se registran en la consola</strong> pero no afectan a REAPER (obvio, no está conectado).
+          </p>
+          <p style="color: var(--color-bg);">
+            Abre la consola del navegador (F12) para ver los comandos que se enviarían a REAPER.
+          </p>
+        </div>
+
+        <div style="background: var(--color-bg-secondary); padding: 24px; border-radius: 12px;">
+          <h2 style="margin-bottom: 16px;">🚀 Para conectar con REAPER real:</h2>
+          <ol style="color: var(--color-text-secondary); line-height: 2;">
+            <li>Configura REAPER (Preferencias → Control/OSC/Web)</li>
+            <li>Copia archivos a <code style="background: var(--color-bg-tertiary); padding: 2px 6px; border-radius: 4px;">reaper_www_root</code></li>
+            <li>Elimina <code style="background: var(--color-bg-tertiary); padding: 2px 6px; border-radius: 4px;">window.MOCK = true</code> del HTML</li>
+            <li>Accede desde tablet a <code style="background: var(--color-bg-tertiary); padding: 2px 6px; border-radius: 4px;">http://IP:8080</code></li>
+          </ol>
+          <p style="margin-top: 16px; color: var(--color-text-secondary);">
+            Consulta <strong>docs/deploy.md</strong> para instrucciones detalladas.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <div class="connection-status">
+        <span class="status-indicator" style="background-color: var(--color-warning);"></span>
+        <span>Modo MOCK - Sin conexión a REAPER</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

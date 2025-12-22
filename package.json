@@ -1,0 +1,29 @@
+{
+  "name": "reaper-live-remote",
+  "version": "1.0.0",
+  "description": "Control remoto táctil para REAPER durante directos en vivo",
+  "main": "webroot/index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000 --directory webroot",
+    "serve": "cd webroot && python -m http.server 8000",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tu-usuario/reaper-live-remote.git"
+  },
+  "keywords": [
+    "reaper",
+    "daw",
+    "live",
+    "remote",
+    "control",
+    "tablet",
+    "music",
+    "backing-tracks"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}
