@@ -1,5 +1,7 @@
 # 🎸 REAPER Live Remote
 
+> 📖 This documentation is also available in [English](README.en.md).
+
 **Control remoto táctil para REAPER durante directos en vivo**
 
 Diseñada para músicos que tocan con backing tracks, esta aplicación web te permite controlar REAPER desde una tablet sin tocar el portátil en el escenario.
