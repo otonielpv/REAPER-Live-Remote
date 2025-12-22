@@ -67,17 +67,34 @@ if ($continue -ne "S" -and $continue -ne "s") {
 # Verificar que REAPER este instalado
 Write-Step "Verificando instalacion de REAPER..."
 
+# Intentar detectar si REAPER está en ejecución para encontrar su ruta
+$reaperProcess = Get-Process reaper -ErrorAction SilentlyContinue
+$reaperRunningDir = $null
+if ($reaperProcess) {
+    try {
+        $reaperRunningDir = Split-Path $reaperProcess.Path -Parent
+        Write-Info "REAPER detectado en ejecucion: $reaperRunningDir"
+    } catch {}
+}
+
 $reaperPaths = @(
     "$env:APPDATA\REAPER",
+    $reaperRunningDir,
     "$env:ProgramFiles\REAPER",
-    "$env:ProgramFiles(x86)\REAPER"
-)
+    "$env:ProgramFiles(x86)\REAPER",
+    "C:\REAPER"
+) | Where-Object { $_ -ne $null }
 
 $reaperDir = $null
 foreach ($path in $reaperPaths) {
     if (Test-Path $path) {
-        $reaperDir = $path
-        break
+        # Preferir la carpeta que contiene reaper.ini (carpeta de recursos)
+        if (Test-Path "$path\reaper.ini") {
+            $reaperDir = $path
+            break
+        }
+        # Si no hay reaper.ini pero existe la carpeta, guardarla como backup
+        if (-not $reaperDir) { $reaperDir = $path }
     }
 }
 
@@ -90,11 +107,12 @@ if (-not $reaperDir) {
     exit 1
 }
 
-Write-Success "REAPER encontrado en: $reaperDir"
+Write-Success "Carpeta de REAPER detectada: $reaperDir"
 
-# Detectar carpeta de scripts
-$scriptsDir = "$env:APPDATA\REAPER\Scripts"
-$wwwDir = "$env:APPDATA\REAPER\reaper_www_root"
+# Detectar carpetas de destino basadas en la carpeta de recursos
+$scriptsDir = "$reaperDir\Scripts"
+$wwwDir = "$reaperDir\reaper_www_root"
+$userPluginsDir = "$reaperDir\UserPlugins"
 
 # ============================================================
 # PASO 1: Verificar/Instalar SWS Extension
@@ -103,14 +121,28 @@ $wwwDir = "$env:APPDATA\REAPER\reaper_www_root"
 Write-Step "Verificando SWS Extension..."
 
 $swsInstalled = $false
-$swsDll = "$env:APPDATA\REAPER\UserPlugins\reaper_sws64.dll"
-$swsDll32 = "$env:APPDATA\REAPER\UserPlugins\reaper_sws.dll"
 
-if ((Test-Path $swsDll) -or (Test-Path $swsDll32)) {
-    $swsInstalled = $true
-    Write-Success "SWS Extension ya esta instalada"
+# Lista de posibles ubicaciones de la DLL de SWS
+$swsDlls = @(
+    "$userPluginsDir\reaper_sws64.dll",
+    "$userPluginsDir\reaper_sws.dll",
+    "$env:APPDATA\REAPER\UserPlugins\reaper_sws64.dll",
+    "$env:APPDATA\REAPER\UserPlugins\reaper_sws.dll",
+    "$env:ProgramFiles\REAPER\UserPlugins\reaper_sws64.dll"
+)
+
+foreach ($dll in $swsDlls) {
+    if (Test-Path $dll) {
+        $swsInstalled = $true
+        $foundSwsPath = $dll
+        break
+    }
+}
+
+if ($swsInstalled) {
+    Write-Success "SWS Extension detectada en: $foundSwsPath"
 } else {
-    Write-Info "SWS Extension no esta instalada"
+    Write-Info "SWS Extension no detectada en las rutas habituales"
     
     if ($SkipSWS) {
         Write-Info "Saltando instalacion de SWS (modo -SkipSWS)"

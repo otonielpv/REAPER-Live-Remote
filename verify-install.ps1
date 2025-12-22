@@ -30,12 +30,43 @@ function Write-Info {
 }
 
 # Variables
-$wwwDir = "$env:APPDATA\REAPER\reaper_www_root"
-$scriptsDir = "$env:APPDATA\REAPER\Scripts"
-$swsDll = "$env:APPDATA\REAPER\UserPlugins\reaper_sws64.dll"
-$swsDll32 = "$env:APPDATA\REAPER\UserPlugins\reaper_sws.dll"
+$appDataDir = "$env:APPDATA\REAPER"
+$programFilesDir = "$env:ProgramFiles\REAPER"
+$programFilesX86Dir = "$env:ProgramFiles(x86)\REAPER"
+
+# Intentar detectar si REAPER está en ejecución para encontrar su ruta
+$reaperProcess = Get-Process reaper -ErrorAction SilentlyContinue
+$reaperRunningDir = $null
+if ($reaperProcess) {
+    try {
+        $reaperRunningDir = Split-Path $reaperProcess.Path -Parent
+    } catch {}
+}
+
+# Lista de posibles carpetas de recursos de REAPER
+$potentialResourceDirs = @(
+    $appDataDir,
+    $reaperRunningDir,
+    $programFilesDir,
+    $programFilesX86Dir,
+    "C:\REAPER"
+) | Where-Object { $_ -ne $null -and (Test-Path $_) } | Select-Object -Unique
+
+# Encontrar la carpeta de recursos real (la que tiene reaper.ini o carpetas clave)
+$resourceDir = $appDataDir # Default
+foreach ($dir in $potentialResourceDirs) {
+    if (Test-Path "$dir\reaper.ini") {
+        $resourceDir = $dir
+        break
+    }
+}
+
+$wwwDir = "$resourceDir\reaper_www_root"
+$scriptsDir = "$resourceDir\Scripts"
+$userPluginsDir = "$resourceDir\UserPlugins"
 
 Write-Title "Verificador de Instalación - REAPER Live Remote"
+Write-Info "Carpeta de recursos detectada: $resourceDir"
 
 $allGood = $true
 
@@ -87,11 +118,30 @@ Write-Host ""
 Write-Host "3. SWS Extension" -ForegroundColor Cyan
 Write-Host ""
 
-$swsInstalled = (Test-Path $swsDll) -or (Test-Path $swsDll32)
+# Buscar SWS en múltiples ubicaciones posibles
+$swsDlls = @(
+    "$userPluginsDir\reaper_sws64.dll",
+    "$userPluginsDir\reaper_sws.dll",
+    "$env:APPDATA\REAPER\UserPlugins\reaper_sws64.dll",
+    "$env:APPDATA\REAPER\UserPlugins\reaper_sws.dll",
+    "$env:ProgramFiles\REAPER\UserPlugins\reaper_sws64.dll",
+    "$env:ProgramFiles(x86)\REAPER\UserPlugins\reaper_sws64.dll"
+)
+
+$swsInstalled = $false
+foreach ($dll in $swsDlls) {
+    if (Test-Path $dll) {
+        $swsInstalled = $true
+        $foundSwsPath = $dll
+        break
+    }
+}
 
 Write-Check "SWS Extension instalada" $swsInstalled
 
-if (-not $swsInstalled) {
+if ($swsInstalled) {
+    Write-Info "Detectada en: $foundSwsPath"
+} else {
     Write-Info "SWS Extension es opcional pero recomendada para modos de salto avanzados"
     Write-Info "Descargar desde: https://www.sws-extension.org"
 }
