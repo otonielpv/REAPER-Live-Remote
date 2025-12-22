@@ -52,103 +52,49 @@ Si tocas en directo con REAPER y necesitas:
 
 ---
 
-## ⚡ Inicio rápido
+## 🚀 Instalación y Actualización
 
-**¿Primera vez?** Solo 3 pasos:
+### ⚡ Instalador Automático (Recomendado para Windows)
 
-1. **Ejecuta el instalador:**
+El instalador configura todo por ti: archivos web, scripts Lua, detección de SWS y Command ID.
+
+1. **Descarga** o clona este repositorio.
+2. Haz doble clic en **`install.bat`**.
+3. Sigue las instrucciones en pantalla.
+
+### 🔄 Cómo Actualizar
+Si has descargado una nueva versión de la herramienta:
+1. Simplemente vuelve a ejecutar **`install.bat`**.
+2. El script detectará tu configuración anterior, actualizará los archivos y mantendrá tu Command ID automáticamente.
+
+### 🍎 Mac / Linux
+1. Abre una terminal en la carpeta del proyecto.
+2. Ejecuta el instalador:
+   ```bash
+   chmod +x install.sh
+   ./install.sh
    ```
-   Doble clic en: install.bat
-   ```
-   
-2. **Sigue las instrucciones** (el instalador te guía paso a paso)
-
-3. **Configura el servidor web en REAPER:**
-   - `Preferences → Control/OSC/Web`
-   - Marca: `☑ Enable web interface`
-   - Puerto: `8080`
-
-**¿Quieres verificar que todo está bien?**
-
-```powershell
-.\verify-install.ps1
-```
-
-**📚 Más ayuda:** Ver [INSTALL.md](INSTALL.md) para guía detallada con capturas.
-
----
-
-## 📸 Screenshots
-
-_(Próximamente)_
-
----
-
-## 🚀 Instalación ultra-rápida
-
-### ⚡ Instalador automático (RECOMENDADO)
-
-**Solo para Windows. Instala TODO automáticamente en 2 minutos.**
-
-#### Opción 1: Doble clic (más fácil)
-
-```
-1. Haz doble clic en: install.bat
-2. Sigue las instrucciones en pantalla
-3. ¡Listo!
-```
-
-#### Opción 2: PowerShell (más control)
-
-```powershell
-.\install.ps1
-```
-
-El instalador automático hace TODO por ti:
-- ✅ Verifica que REAPER esté instalado
-- ✅ Te ayuda a instalar SWS Extension (si no la tienes)
-- ✅ Copia el script Lua a la carpeta correcta
-- ✅ Copia la interfaz web a REAPER
-- ✅ Te guía para registrar el script y obtener el Command ID
-- ✅ Configura automáticamente el Command ID en el código
-- ✅ Te muestra tu IP local para conectar desde la tablet
-
-**👉 Ver guía detallada con capturas: [INSTALL.md](INSTALL.md)**
 
 ---
 
 ### 📋 Requisitos previos
 
-- **REAPER** v6.0 o superior ([descargar](https://www.reaper.fm))
-- **Windows** 7/8/10/11 (para el instalador automático)
-- Tablet y PC en la **misma red WiFi**
-- Navegador moderno (Chrome, Safari, Firefox, Edge)
-
-> 💡 **Nota**: SWS Extension se puede instalar automáticamente durante la instalación.
+- **REAPER** v6.0 o superior.
+- **SWS Extension** (opcional pero recomendada para saltos avanzados).
+- Tablet y PC en la **misma red WiFi**.
 
 ---
 
-### 🔧 Último paso: Configurar servidor web
+### 🔧 Configuración final en REAPER
 
-Después de ejecutar el instalador, solo necesitas:
+Después de instalar, activa la interfaz en REAPER:
 
-1. Abre **REAPER**
-2. Ve a **Preferences → Control/OSC/Web** (Ctrl+P)
-3. Marca: **☑ Enable web interface**
-4. Configura:
-   - **Puerto**: `8080`
-   - **Usuario/Contraseña**: (opcional, recomendado)
-5. Haz clic en **OK**
-
-**¡Listo!** Ahora abre tu tablet y ve a `http://TU-IP:8080`
-
----
-
-### 🍎 Instalación en Mac/Linux
-
-Si usas Mac o Linux, puedes instalar manualmente:
-
-**Ver guía completa: [INSTALL.md](INSTALL.md#instalación-manual)**
+1. Ve a **Preferences → Control/OSC/Web**.
+2. Haz clic en **Add** y selecciona **Web browser interface**.
+3. Configura:
+   - **Default interface**: `index.html` (o déjalo en blanco si usas el puerto por defecto).
+   - **Port**: `8080` (o el que prefieras).
+4. ¡Listo! Accede desde tu tablet usando la IP que te mostró el instalador.
 
 ---
 
