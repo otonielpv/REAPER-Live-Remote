@@ -203,6 +203,15 @@ function main()
     
     autoConfigureForJumpMode(jump_mode)
     
+  elseif action == "cancel" then
+    -- CANCELAR SALTO: Desactivar smooth seeking y forzar modo inmediato
+    msg("🚫 Cancelando salto programado...")
+    setSmoothSeekState(false, false)
+    setSmoothSeekMeasures(0)
+    -- Opcional: Podríamos intentar forzar un seek a la posición actual para "limpiar" el buffer de seek de REAPER
+    local cur_pos = reaper.GetPlayPosition()
+    reaper.SetEditCurPos(cur_pos, false, false)
+    
   elseif action == "status" then
     -- Mostrar estado y guardarlo en ExtState para que la web pueda leerlo
     local enabled, use_markers = getSmoothSeekState()

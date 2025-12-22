@@ -396,13 +396,15 @@ export async function cancelScheduledJump() {
       return true;
     }
     
-    // Establecer modo immediate (desactiva smooth seeking)
+    // PASO 1: Establecer acción específica de cancelación
+    console.log('  → Escribiendo ExtState: smooth_seeking_action = cancel');
+    await makeRequest(`/_/SET/EXTSTATE/LiveRemote/smooth_seeking_action/cancel`);
+    
+    // PASO 2: También poner el modo en immediate por si acaso
     console.log('  → Escribiendo ExtState: jump_mode = immediate');
     await makeRequest(`/_/SET/EXTSTATE/LiveRemote/jump_mode/immediate`);
     
-    console.log('  → Escribiendo ExtState: smooth_seeking_action = auto_config');
-    await makeRequest(`/_/SET/EXTSTATE/LiveRemote/smooth_seeking_action/auto_config`);
-    
+    // PASO 3: Ejecutar script
     console.log('  → Ejecutando script');
     await makeRequest(`/_/${SMOOTH_CMD}`);
     
