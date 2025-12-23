@@ -38,13 +38,6 @@
       <!-- Se llenará con JavaScript -->
     </div>
 
-    <!-- Botón de cancelar salto (inicialmente oculto) -->
-    <div class="cancel-jump-container">
-      <button id="cancel-jump-btn" class="cancel-jump-btn" style="display: none;">
-        🚫 Cancelar Salto
-      </button>
-    </div>
-
     <!-- Tabs -->
     <nav class="tabs">
       <button class="tab-btn active" data-tab="sections">Secciones</button>
@@ -232,14 +225,6 @@
       loadSongData();
     });
 
-    // Botón de cancelar salto
-    const cancelJumpBtn = document.getElementById('cancel-jump-btn');
-    if (cancelJumpBtn) {
-      cancelJumpBtn.addEventListener('click', () => {
-        ui.handleCancelJump();
-      });
-    }
-
     // Tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -307,13 +292,6 @@
               
               // Actualizar resaltado visual usando la función exportada de ui.js
               ui.highlightActiveSection(currentSection.id);
-              
-              // Si llegamos a la sección pendiente, el salto se completó
-              const pendingJump = state.getPendingJump();
-              if (pendingJump && pendingJump.sectionId === currentSection.id) {
-                console.log('✅ Salto programado completado');
-                state.setPendingJump(null, null);
-              }
             }
           } else if (previousSectionId !== null) {
             // Ya no estamos en ninguna sección

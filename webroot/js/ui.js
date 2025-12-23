@@ -135,20 +135,12 @@ async function handleSectionClick(sectionId, jumpMode) {
     // Ejecutar salto según modo
     if (jumpMode === 'bar') {
       console.log('📍 Salto al compás...');
-      state.setPendingJump(sectionId, jumpMode);
-      setPendingSection(sectionId);
-      showCancelButton(); // Mostrar botón de cancelar
       await api.jumpToSection(sectionId); // El script Lua gestiona el timing
     } else if (jumpMode === 'region-end') {
       console.log('📍 Salto al final de región...');
-      state.setPendingJump(sectionId, jumpMode);
-      setPendingSection(sectionId);
-      showCancelButton(); // Mostrar botón de cancelar
       await api.jumpToSection(sectionId); // El script Lua gestiona el timing
     } else {
       console.log('📍 Salto inmediato...');
-      state.setPendingJump(null, null); // No hay salto pendiente
-      hideCancelButton();
       await api.jumpToSection(sectionId);
       highlightActiveSection(sectionId);
     }
@@ -162,33 +154,13 @@ async function handleSectionClick(sectionId, jumpMode) {
 }
 
 /**
- * Marcar sección como pendiente (esperando salto programado)
- * @param {number} sectionId 
- */
-export function setPendingSection(sectionId) {
-  // Quitar pending anterior
-  document.querySelectorAll('.section-btn.pending').forEach(btn => {
-    btn.classList.remove('pending');
-  });
-  
-  // Añadir pending a la seleccionada
-  if (sectionId !== null && sectionId !== undefined) {
-    const pendingBtn = document.querySelector(`.section-btn[data-section-id="${sectionId}"]`);
-    if (pendingBtn) {
-      pendingBtn.classList.add('pending');
-      console.log(`🟠 Sección ${sectionId} marcada como pendiente`);
-    }
-  }
-}
-
-/**
  * Resaltar sección activa
  * @param {number} sectionId 
  */
 export function highlightActiveSection(sectionId) {
-  // Quitar pending y active anteriores
-  document.querySelectorAll('.section-btn.pending, .section-btn.active').forEach(btn => {
-    btn.classList.remove('pending', 'active');
+  // Quitar active anterior
+  document.querySelectorAll('.section-btn.active').forEach(btn => {
+    btn.classList.remove('active');
   });
   
   // Añadir resaltado a la actual
@@ -197,72 +169,6 @@ export function highlightActiveSection(sectionId) {
     if (activeBtn) {
       activeBtn.classList.add('active');
     }
-  }
-  
-  // Limpiar salto pendiente cuando se completa
-  state.setPendingJump(null, null);
-  hideCancelButton();
-}
-
-/**
- * Mostrar botón de cancelar salto
- */
-function showCancelButton() {
-  const cancelBtn = document.getElementById('cancel-jump-btn');
-  if (cancelBtn) {
-    cancelBtn.style.display = 'block';
-  }
-}
-
-/**
- * Ocultar botón de cancelar salto
- */
-function hideCancelButton() {
-  const cancelBtn = document.getElementById('cancel-jump-btn');
-  if (cancelBtn) {
-    cancelBtn.style.display = 'none';
-  }
-}
-
-/**
- * Cancelar salto programado
- */
-export async function handleCancelJump() {
-  console.log('🚫 Usuario solicita cancelar salto');
-  
-  const pendingJump = state.getPendingJump();
-  if (!pendingJump) {
-    console.log('⚠️ No hay salto pendiente');
-    return;
-  }
-  
-  try {
-    // Cancelar en REAPER
-    const success = await api.cancelScheduledJump();
-    
-    if (success) {
-      // Limpiar UI
-      setPendingSection(null);
-      hideCancelButton();
-      state.setPendingJump(null, null);
-      
-      console.log('✅ Salto cancelado exitosamente');
-      
-      // Feedback visual breve
-      const cancelBtn = document.getElementById('cancel-jump-btn');
-      if (cancelBtn) {
-        const originalText = cancelBtn.textContent;
-        cancelBtn.textContent = '✓ Cancelado';
-        cancelBtn.classList.add('success');
-        setTimeout(() => {
-          cancelBtn.textContent = originalText;
-          cancelBtn.classList.remove('success');
-        }, 1000);
-      }
-    }
-  } catch (error) {
-    console.error('❌ Error cancelando salto:', error);
-    alert(`Error al cancelar: ${error.message}`);
   }
 }
 

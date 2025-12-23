@@ -48,9 +48,6 @@ export const state = {
   isPlaying: false,
   currentPos: 0.0,
   
-  // Salto programado
-  pendingJump: null,  // {sectionId, mode} si hay un salto pendiente
-  
   // Agrupación calculada (canciones → secciones)
   // Regiones = Canciones
   // Marcadores = Secciones
@@ -97,27 +94,6 @@ export function setCurrentSong(songId) {
  */
 export function setCurrentRegion(regionId) {
   state.currentRegionId = regionId;
-}
-
-/**
- * Establecer salto pendiente
- * @param {number|null} sectionId 
- * @param {string} mode 
- */
-export function setPendingJump(sectionId, mode) {
-  if (sectionId === null) {
-    state.pendingJump = null;
-  } else {
-    state.pendingJump = { sectionId, mode };
-  }
-}
-
-/**
- * Obtener salto pendiente
- * @returns {{sectionId: number, mode: string}|null}
- */
-export function getPendingJump() {
-  return state.pendingJump;
 }
 
 /**

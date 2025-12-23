@@ -268,57 +268,6 @@ button {
   border-color: var(--color-success);
 }
 
-/* ===== BOTÓN DE CANCELAR SALTO ===== */
-.cancel-jump-container {
-  display: flex;
-  justify-content: center;
-  padding: var(--spacing-md) var(--spacing-lg);
-  background-color: var(--color-bg-secondary);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.cancel-jump-btn {
-  padding: var(--spacing-md) var(--spacing-xl);
-  background-color: var(--color-danger);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--border-radius-lg);
-  color: white;
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  min-height: 60px;
-  box-shadow: var(--shadow-md);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.cancel-jump-btn:hover,
-.cancel-jump-btn:active {
-  background-color: #d32f2f;
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: scale(0.98);
-}
-
-.cancel-jump-btn.success {
-  background-color: var(--color-success);
-  border-color: var(--color-success);
-}
-
-/* Animación pulsante para llamar la atención */
-@keyframes pulse-cancel {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(244, 67, 54, 0);
-  }
-}
-
-.cancel-jump-btn {
-  animation: pulse-cancel 2s infinite;
-}
-
 /* ===== TABS ===== */
 .tabs {
   display: flex;
@@ -392,24 +341,6 @@ button {
   color: white;
 }
 
-.section-btn.pending {
-  background-color: #ff9800;
-  border-color: #ff9800;
-  color: white;
-  animation: pulse 1s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(0.98);
-  }
-}
-
 .section-name {
   font-size: var(--font-size-xl);
   font-weight: 600;
@@ -424,10 +355,6 @@ button {
 
 .section-btn.active .section-duration {
   color: rgba(255, 255, 255, 0.8);
-}
-
-.section-btn.pending .section-duration {
-  color: rgba(255, 255, 255, 0.9);
 }
 
 /* ===== CONFIGURACIÓN DE COMPASES (TOP) ===== */
