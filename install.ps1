@@ -292,9 +292,31 @@ if (-not (Test-Path $scriptsDir)) {
 $luaScript = "reaper-scripts\smooth_seeking_control_v3.lua"
 $destLuaScript = "$scriptsDir\smooth_seeking_control_v3.lua"
 
+# NUEVA LÓGICA: Detectar si el script ya está registrado en una ruta distinta para actualizar el archivo CORRECTO
+if (Test-Path $kbFile) {
+    Write-Info "Verificando ruta de registro en REAPER..."
+    $kbContent = Get-Content $kbFile
+    # Buscar la línea del script y extraer la ruta entre comillas
+    $line = $kbContent | Select-String "smooth_seeking_control_v3.lua" | Select-Object -First 1
+    if ($line -and $line.ToString() -match '"([^"]+\.lua)"') {
+        $registeredPath = $matches[1]
+        # Si la ruta no es absoluta, REAPER la busca en la carpeta Scripts
+        if (-not [System.IO.Path]::IsPathRooted($registeredPath)) {
+            $fullRegisteredPath = Join-Path $scriptsDir $registeredPath
+        } else {
+            $fullRegisteredPath = $registeredPath
+        }
+        
+        if (Test-Path $fullRegisteredPath) {
+            $destLuaScript = $fullRegisteredPath
+            Write-Info "REAPER está usando este archivo: $destLuaScript"
+        }
+    }
+}
+
 if (Test-Path $luaScript) {
     Copy-Item -Path $luaScript -Destination $destLuaScript -Force
-    Write-Success "Script Lua copiado a: $destLuaScript"
+    Write-Success "Script Lua actualizado correctamente en: $destLuaScript"
 } else {
     Write-Error-Custom "No se encontro el script Lua en: $luaScript"
     exit 1

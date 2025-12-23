@@ -95,19 +95,32 @@ function monitor_loop()
 
   local current_pos = reaper.GetPlayPosition()
   
-  -- Umbral de disparo (150ms antes para asegurar que REAPER procese el seek a tiempo)
-  local threshold = 0.150 
+  -- Umbral de disparo HÍBRIDO:
+  -- Disparamos 300ms antes para que el motor interno de REAPER tenga tiempo
+  -- de preparar el crossfade y el salto sea fluido.
+  local threshold = 0.300 
   
   if current_pos >= (trigger_time - threshold) then
-    msg("🚀 Disparando salto a " .. target_pos .. "s (Trigger: " .. trigger_time .. "s)")
+    msg("🚀 Disparando salto FLUÍDO a " .. target_pos .. "s")
     
-    -- Realizar el salto (seekplay = true para que el cursor de reproducción salte)
+    -- 1. Activar el motor de Smooth Seek interno de REAPER justo ahora
+    -- Bit 1 = ON, Bit 2 = 0 (measures)
+    setSmoothSeekState(true, false)
+    -- 0 compases de espera interna (porque ya hemos esperado nosotros en Lua)
+    setSmoothSeekMeasures(0)
+    
+    -- 2. Realizar el salto usando el motor interno (esto aplica el crossfade de REAPER)
     reaper.SetEditCurPos(target_pos, true, true)
     
-    -- Limpiar estado
+    -- 3. Limpiar estado y desactivar el bit para el próximo salto
     reaper.DeleteExtState("LiveRemote", "deferred_jump_pos", false)
     reaper.DeleteExtState("LiveRemote", "trigger_time", false)
     reaper.DeleteExtState("LiveRemote", "lua_monitoring", false)
+    
+    -- Pequeño delay para asegurar que REAPER procese el seek antes de apagar el bit
+    reaper.defer(function() 
+      setSmoothSeekState(false, false) 
+    end)
   else
     -- Seguir monitoreando
     reaper.defer(monitor_loop)
