@@ -48,6 +48,9 @@ export const state = {
   isPlaying: false,
   currentPos: 0.0,
   
+  // Salto pendiente (para persistencia tras recarga)
+  pendingSectionId: null,
+  
   // Agrupación calculada (canciones → secciones)
   // Regiones = Canciones
   // Marcadores = Secciones
@@ -118,6 +121,27 @@ export function setBarCount(count) {
 }
 
 /**
+ * Establecer sección pendiente de salto
+ * @param {number|null} sectionId 
+ */
+export function setPendingSectionId(sectionId) {
+  state.pendingSectionId = sectionId;
+  if (sectionId === null) {
+    localStorage.removeItem('reaper_pending_section_id');
+  } else {
+    localStorage.setItem('reaper_pending_section_id', sectionId.toString());
+  }
+}
+
+/**
+ * Obtener sección pendiente de salto
+ * @returns {number|null}
+ */
+export function getPendingSectionId() {
+  return state.pendingSectionId;
+}
+
+/**
  * Cargar preferencias desde localStorage
  */
 export function loadPreferences() {
@@ -129,6 +153,12 @@ export function loadPreferences() {
   const barCount = localStorage.getItem('reaper_bar_count');
   if (barCount !== null) {
     state.barCount = parseInt(barCount);
+  }
+  
+  // Cargar sección pendiente
+  const pendingId = localStorage.getItem('reaper_pending_section_id');
+  if (pendingId !== null) {
+    state.pendingSectionId = parseInt(pendingId);
   }
   
   // Cargar Command ID del script si está configurado

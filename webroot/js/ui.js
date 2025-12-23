@@ -104,6 +104,12 @@ export function renderSections(container, sections) {
 function createSectionButton(section) {
   const btn = document.createElement('button');
   btn.className = 'section-btn';
+  
+  // Si esta sección es la que está pendiente de salto, añadir clase
+  if (section.id === state.getPendingSectionId()) {
+    btn.classList.add('pending');
+  }
+  
   btn.setAttribute('data-section-id', section.id);
   
   btn.innerHTML = `
@@ -160,6 +166,9 @@ async function handleSectionClick(sectionId, jumpMode) {
  * @param {number} sectionId 
  */
 export function setPendingSection(sectionId) {
+  // Actualizar estado persistente
+  state.setPendingSectionId(sectionId);
+  
   // Quitar pending anterior
   document.querySelectorAll('.section-btn.pending').forEach(btn => {
     btn.classList.remove('pending');
@@ -180,10 +189,22 @@ export function setPendingSection(sectionId) {
  * @param {number} sectionId 
  */
 export function highlightActiveSection(sectionId) {
-  // Quitar pending y active anteriores
-  document.querySelectorAll('.section-btn.pending, .section-btn.active').forEach(btn => {
-    btn.classList.remove('pending', 'active');
+  // Si la sección que se activa es la que estaba pendiente, limpiar el estado pendiente
+  if (sectionId !== null && sectionId === state.getPendingSectionId()) {
+    state.setPendingSectionId(null);
+  }
+
+  // Quitar active anterior de todos los botones
+  document.querySelectorAll('.section-btn.active').forEach(btn => {
+    btn.classList.remove('active');
   });
+  
+  // Si no hay nada pendiente en el estado, asegurar que no haya clases pending en el DOM
+  if (!state.getPendingSectionId()) {
+    document.querySelectorAll('.section-btn.pending').forEach(btn => {
+      btn.classList.remove('pending');
+    });
+  }
   
   // Añadir resaltado a la actual
   if (sectionId !== null && sectionId !== undefined) {
