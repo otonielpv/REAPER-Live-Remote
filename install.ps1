@@ -67,34 +67,64 @@ if ($continue -ne "S" -and $continue -ne "s") {
 # Verificar que REAPER este instalado
 Write-Step "Verificando instalacion de REAPER..."
 
-# Intentar detectar si REAPER está en ejecución para encontrar su ruta
+# 1. Intentar detectar si REAPER está en ejecución (Ruta más fiable)
 $reaperProcess = Get-Process reaper -ErrorAction SilentlyContinue
 $reaperRunningDir = $null
 if ($reaperProcess) {
     try {
         $reaperRunningDir = Split-Path $reaperProcess.Path -Parent
-        Write-Info "REAPER detectado en ejecucion: $reaperRunningDir"
+        Write-Info "REAPER detectado en ejecucion en: $reaperRunningDir"
     } catch {}
 }
 
+# 2. Lista de rutas posibles (Priorizando la que está en ejecución y carpetas de recursos)
 $reaperPaths = @(
-    "$env:APPDATA\REAPER",
-    $reaperRunningDir,
-    "$env:ProgramFiles\REAPER",
-    "$env:ProgramFiles(x86)\REAPER",
-    "C:\REAPER"
-) | Where-Object { $_ -ne $null }
+    $reaperRunningDir,                                # 1. Carpeta del proceso activo
+    "$env:APPDATA\REAPER",                            # 2. Carpeta de recursos estándar
+    "$env:ProgramFiles\REAPER",                       # 3. Carpeta de programa (64-bit)
+    "$env:ProgramFiles(x86)\REAPER",                  # 4. Carpeta de programa (32-bit)
+    "C:\REAPER"                                       # 5. Ruta común de instalaciones portables
+) | Where-Object { $_ -ne $null } | Select-Object -Unique
 
 $reaperDir = $null
+$foundPaths = @()
+
 foreach ($path in $reaperPaths) {
     if (Test-Path $path) {
-        # Preferir la carpeta que contiene reaper.ini (carpeta de recursos)
+        # Una carpeta de REAPER válida debe tener reaper.ini o ser la carpeta de instalación
         if (Test-Path "$path\reaper.ini") {
-            $reaperDir = $path
-            break
+            $foundPaths += $path
+        } elseif (Test-Path "$path\reaper.exe") {
+            # Si es la carpeta del EXE, verificar si es portable (reaper.ini está ahí)
+            # o si los recursos están en AppData
+            if (Test-Path "$path\reaper.ini") {
+                $foundPaths += $path
+            }
         }
-        # Si no hay reaper.ini pero existe la carpeta, guardarla como backup
-        if (-not $reaperDir) { $reaperDir = $path }
+    }
+}
+
+if ($foundPaths.Count -gt 1) {
+    Write-Info "Se han encontrado varias carpetas de REAPER:"
+    for ($i = 0; $i -lt $foundPaths.Count; $i++) {
+        Write-Host "  [$($i+1)] $($foundPaths[$i])" -ForegroundColor White
+    }
+    $choice = Read-Host "Cual deseas usar? (1-$($foundPaths.Count))"
+    if ($choice -match '^\d+$' -and [int]$choice -le $foundPaths.Count) {
+        $reaperDir = $foundPaths[[int]$choice - 1]
+    } else {
+        $reaperDir = $foundPaths[0]
+    }
+} elseif ($foundPaths.Count -eq 1) {
+    $reaperDir = $foundPaths[0]
+}
+
+# Si no se detectó nada, preguntar al usuario
+if (-not $reaperDir) {
+    Write-Info "No se pudo detectar la carpeta de REAPER automáticamente."
+    $manualPath = Read-Host "Por favor, pega la ruta de tu carpeta de REAPER (donde está reaper.ini)"
+    if (Test-Path $manualPath) {
+        $reaperDir = $manualPath
     }
 }
 
