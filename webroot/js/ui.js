@@ -135,9 +135,11 @@ async function handleSectionClick(sectionId, jumpMode) {
     // Ejecutar salto según modo
     if (jumpMode === 'bar') {
       console.log('📍 Salto al compás...');
+      setPendingSection(sectionId);
       await api.jumpToSection(sectionId); // El script Lua gestiona el timing
     } else if (jumpMode === 'region-end') {
       console.log('📍 Salto al final de región...');
+      setPendingSection(sectionId);
       await api.jumpToSection(sectionId); // El script Lua gestiona el timing
     } else {
       console.log('📍 Salto inmediato...');
@@ -154,13 +156,33 @@ async function handleSectionClick(sectionId, jumpMode) {
 }
 
 /**
+ * Marcar sección como pendiente (esperando salto programado)
+ * @param {number} sectionId 
+ */
+export function setPendingSection(sectionId) {
+  // Quitar pending anterior
+  document.querySelectorAll('.section-btn.pending').forEach(btn => {
+    btn.classList.remove('pending');
+  });
+  
+  // Añadir pending a la seleccionada
+  if (sectionId !== null && sectionId !== undefined) {
+    const pendingBtn = document.querySelector(`.section-btn[data-section-id="${sectionId}"]`);
+    if (pendingBtn) {
+      pendingBtn.classList.add('pending');
+      console.log(`🟠 Sección ${sectionId} marcada como pendiente`);
+    }
+  }
+}
+
+/**
  * Resaltar sección activa
  * @param {number} sectionId 
  */
 export function highlightActiveSection(sectionId) {
-  // Quitar active anterior
-  document.querySelectorAll('.section-btn.active').forEach(btn => {
-    btn.classList.remove('active');
+  // Quitar pending y active anteriores
+  document.querySelectorAll('.section-btn.pending, .section-btn.active').forEach(btn => {
+    btn.classList.remove('pending', 'active');
   });
   
   // Añadir resaltado a la actual
