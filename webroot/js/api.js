@@ -330,6 +330,11 @@ export async function jumpToMarker(markerId) {
   
   console.log(`📍 Marcador encontrado: "${marker.name}" @ ${marker.pos}s`);
   
+  // Si el modo es diferido (bar o region-end), usar la lógica de Lua
+  if (state.state.jumpMode === 'bar' || state.state.jumpMode === 'region-end') {
+    return await requestDeferredJump(marker.pos);
+  }
+
   // Usar seekTo directo (funciona para cualquier cantidad de marcadores)
   await seekTo(marker.pos);
   console.log(`✅ Salto completado`);
@@ -343,7 +348,12 @@ export async function jumpToRegion(regionId) {
   if (config.useMock) {
     console.log(`🎯 MOCK: Jump to region ${regionId}`);
     const region = mockData.regions.find(r => r.id === regionId);
-    if (region) await seekTo(region.start);
+    if (region) {
+      if (state.state.jumpMode === 'bar' || state.state.jumpMode === 'region-end') {
+        return await requestDeferredJump(region.start);
+      }
+      await seekTo(region.start);
+    }
     return;
   }
 
@@ -358,8 +368,53 @@ export async function jumpToRegion(regionId) {
   }
   
   console.log(`📍 Región encontrada: "${region.name}" @ ${region.start}s`);
+
+  // Si el modo es diferido (bar o region-end), usar la lógica de Lua
+  if (state.state.jumpMode === 'bar' || state.state.jumpMode === 'region-end') {
+    return await requestDeferredJump(region.start);
+  }
+
   await seekTo(region.start);
   console.log(`✅ Salto completado`);
+}
+
+/**
+ * Solicitar un salto diferido manejado por Lua (Fluent Jump)
+ * Esto evita el "locked seek" de REAPER y permite cancelaciones sin ruidos.
+ * 
+ * @param {number} targetPos - Posición destino en segundos
+ * @returns {Promise<boolean>}
+ */
+export async function requestDeferredJump(targetPos) {
+  if (config.useMock) {
+    console.log(`🚀 MOCK: Request deferred jump to ${targetPos}s`);
+    return true;
+  }
+
+  console.log(`🚀 Solicitando salto diferido a ${targetPos}s...`);
+
+  try {
+    const SMOOTH_CMD = state.state.smoothSeekingScriptCmd;
+    if (!SMOOTH_CMD) {
+      console.warn('⚠️ Script Lua no configurado, cayendo a seek inmediato');
+      return await seekTo(targetPos);
+    }
+
+    // 1. Establecer posición destino
+    await makeRequest(`/_/SET/EXTSTATE/LiveRemote/deferred_jump_pos/${targetPos}`);
+    
+    // 2. Establecer acción para el script
+    await makeRequest(`/_/SET/EXTSTATE/LiveRemote/smooth_seeking_action/request_jump`);
+    
+    // 3. Ejecutar script
+    await makeRequest(`/_/${SMOOTH_CMD}`);
+    
+    console.log('✅ Solicitud de salto diferido enviada a Lua');
+    return true;
+  } catch (error) {
+    console.error('❌ Error solicitando salto diferido:', error);
+    return await seekTo(targetPos); // Fallback a inmediato
+  }
 }
 
 /**
