@@ -320,7 +320,7 @@ function main()
     end
     
   else
-    error_msg("Acción desconocida: " .. action .. " (válidas: enable, disable, toggle, auto_config, status)")
+    error_msg("Acción desconocida: " .. action .. " (válidas: enable, disable, toggle, auto_config, status, request_jump, cancel)")
   end
   
   -- Limpiar ExtState después de ejecutar
