@@ -77,31 +77,13 @@ if ($reaperProcess) {
     } catch {}
 }
 
-# 2. Intentar detectar vía Registro de Windows
-$registryPaths = @(
-    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\REAPER",
-    "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\REAPER",
-    "HKCU:\Software\REAPER"
-)
-
-$regFoundPaths = @()
-foreach ($regPath in $registryPaths) {
-    if (Test-Path $regPath) {
-        $val = Get-ItemProperty -Path $regPath -Name "InstallLocation", "Path" -ErrorAction SilentlyContinue
-        if ($val.InstallLocation) { $regFoundPaths += $val.InstallLocation }
-        if ($val.Path) { $regFoundPaths += $val.Path }
-    }
-}
-
-# 3. Lista de rutas posibles (Priorizando la que está en ejecución y carpetas de recursos)
+# 2. Lista de rutas posibles (Priorizando la que está en ejecución y carpetas de recursos)
 $reaperPaths = @(
     $reaperRunningDir,                                # 1. Carpeta del proceso activo
-    "$env:APPDATA\REAPER"                             # 2. Carpeta de recursos estándar
-) + $regFoundPaths + @(                               # 3. Rutas encontradas en registro
-    "$env:ProgramFiles\REAPER",                       # 4. Carpeta de programa (64-bit)
-    "$env:ProgramFiles(x86)\REAPER",                  # 5. Carpeta de programa (32-bit)
-    "C:\REAPER",                                      # 6. Rutas comunes
-    "D:\REAPER"                                       # 7. Ruta en disco D (común para músicos)
+    "$env:APPDATA\REAPER",                            # 2. Carpeta de recursos estándar
+    "$env:ProgramFiles\REAPER",                       # 3. Carpeta de programa (64-bit)
+    "$env:ProgramFiles(x86)\REAPER",                  # 4. Carpeta de programa (32-bit)
+    "C:\REAPER"                                       # 5. Ruta común de instalaciones portables
 ) | Where-Object { $_ -ne $null } | Select-Object -Unique
 
 $reaperDir = $null
@@ -114,7 +96,7 @@ foreach ($path in $reaperPaths) {
             $foundPaths += $path
         } elseif (Test-Path "$path\reaper.exe") {
             # Si es la carpeta del EXE, verificar si es portable (reaper.ini está ahí)
-            # o si los recursos están en AppData (en cuyo caso esta ruta no es la de recursos)
+            # o si los recursos están en AppData
             if (Test-Path "$path\reaper.ini") {
                 $foundPaths += $path
             }
@@ -122,21 +104,13 @@ foreach ($path in $reaperPaths) {
     }
 }
 
-# Eliminar duplicados y limpiar rutas
-$foundPaths = $foundPaths | Select-Object -Unique
-
 if ($foundPaths.Count -gt 1) {
-    Write-Info "Se han encontrado varias posibles carpetas de REAPER:"
+    Write-Info "Se han encontrado varias carpetas de REAPER:"
     for ($i = 0; $i -lt $foundPaths.Count; $i++) {
-        $type = "Recursos/Configuracion"
-        if (Test-Path "$($foundPaths[$i])\reaper.exe") { $type = "Instalacion Portable" }
-        if ($foundPaths[$i] -like "*AppData*") { $type = "Instalacion Estandar (AppData)" }
-        
-        Write-Host "  [$($i+1)] $($foundPaths[$i]) ($type)" -ForegroundColor White
+        Write-Host "  [$($i+1)] $($foundPaths[$i])" -ForegroundColor White
     }
-    Write-Host ""
     $choice = Read-Host "Cual deseas usar? (1-$($foundPaths.Count))"
-    if ($choice -match '^\d+$' -and [int]$choice -ge 1 -and [int]$choice -le $foundPaths.Count) {
+    if ($choice -match '^\d+$' -and [int]$choice -le $foundPaths.Count) {
         $reaperDir = $foundPaths[[int]$choice - 1]
     } else {
         $reaperDir = $foundPaths[0]
