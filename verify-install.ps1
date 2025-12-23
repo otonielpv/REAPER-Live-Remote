@@ -43,23 +43,44 @@ if ($reaperProcess) {
     } catch {}
 }
 
+# Intentar detectar vía Registro de Windows
+$registryPaths = @(
+    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\REAPER",
+    "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\REAPER",
+    "HKCU:\Software\REAPER"
+)
+
+$regFoundPaths = @()
+foreach ($regPath in $registryPaths) {
+    if (Test-Path $regPath) {
+        $val = Get-ItemProperty -Path $regPath -Name "InstallLocation", "Path" -ErrorAction SilentlyContinue
+        if ($val.InstallLocation) { $regFoundPaths += $val.InstallLocation }
+        if ($val.Path) { $regFoundPaths += $val.Path }
+    }
+}
+
 # Lista de posibles carpetas de recursos de REAPER
 $potentialResourceDirs = @(
-    $appDataDir,
     $reaperRunningDir,
-    $programFilesDir,
-    $programFilesX86Dir,
-    "C:\REAPER"
+    "$env:APPDATA\REAPER"
+) + $regFoundPaths + @(
+    "$env:ProgramFiles\REAPER",
+    "$env:ProgramFiles(x86)\REAPER",
+    "C:\REAPER",
+    "D:\REAPER"
 ) | Where-Object { $_ -ne $null -and (Test-Path $_) } | Select-Object -Unique
 
 # Encontrar la carpeta de recursos real (la que tiene reaper.ini o carpetas clave)
-$resourceDir = $appDataDir # Default
+$resourceDir = $null
 foreach ($dir in $potentialResourceDirs) {
     if (Test-Path "$dir\reaper.ini") {
         $resourceDir = $dir
         break
     }
 }
+
+# Si no se encontró, usar AppData como fallback
+if (-not $resourceDir) { $resourceDir = "$env:APPDATA\REAPER" }
 
 $wwwDir = "$resourceDir\reaper_www_root"
 $scriptsDir = "$resourceDir\Scripts"
