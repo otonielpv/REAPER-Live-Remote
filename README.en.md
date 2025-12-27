@@ -374,21 +374,6 @@ The application will use simulated data from `tests/mock-api.json`.
 
 ---
 
-## 📚 Additional Documentation
-
-### 🚀 Installation and Setup
-- **[INSTALL.md](INSTALL.md)** - Step-by-step installation guide with screenshots
-- **[WELCOME.md](WELCOME.md)** - Quick introduction to the project
-- **[SCRIPTS-INFO.md](SCRIPTS-INFO.md)** - Explanation of each installation script
-- **[docs/server-setup.md](docs/server-setup.md)** - Configure web server in REAPER (with troubleshooting)
-
-### 📖 Usage and Development
-- **[docs/mapping.md](docs/mapping.md)** - REAPER HTTP endpoints and API functions
-- **[docs/deploy.md](docs/deploy.md)** - Full deployment guide
-- **[reaper-scripts/README.md](reaper-scripts/README.md)** - Lua scripts documentation
-- **[reaper-scripts/SCRIPTS-GUIDE.md](reaper-scripts/SCRIPTS-GUIDE.md)** - Detailed scripts guide
-
----
 
 ## 🚧 Known Limitations
 
