@@ -11,6 +11,29 @@ Designed for musicians playing with backing tracks, this web application allows 
 
 ---
 
+## 📑 Table of Contents
+
+- [🎯 Why use this?](#-why-use-this)
+- [✨ Main Features](#-main-features)
+- [📸 Screenshot Gallery](#-screenshot-gallery)
+- [🎼 Example Project](#-example-project)
+- [🚀 Installation and Update](#-installation-and-update)
+- [🎼 How to Prepare Your REAPER Project](#-how-to-prepare-your-reaper-project)
+- [🎮 How to Use](#-how-to-use)
+- [📖 Jump Modes Explained](#-jump-modes-explained)
+- [🛠️ Project Structure](#️-project-structure)
+- [🐛 Troubleshooting](#-troubleshooting)
+- [🧪 Demo Mode](#-demo-mode-without-reaper)
+- [📚 Additional Documentation](#-additional-documentation)
+- [🚧 Known Limitations](#-known-limitations)
+- [🎯 Roadmap](#-roadmap)
+- [🤝 Contributing](#-contributing)
+- [📜 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
+- [📞 Contact](#-contact)
+
+---
+
 ## 🎯 Why use this?
 
 If you play live with REAPER and need to:

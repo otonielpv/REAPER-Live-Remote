@@ -11,6 +11,29 @@ Diseñada para músicos que tocan con backing tracks, esta aplicación web te pe
 
 ---
 
+## 📑 Índice
+
+- [🎯 ¿Por qué usar esto?](#-por-qué-usar-esto)
+- [✨ Características principales](#-características-principales)
+- [📸 Galería de pantallas](#-galería-de-pantallas)
+- [🎼 Proyecto de ejemplo](#-proyecto-de-ejemplo)
+- [🚀 Instalación y Actualización](#-instalación-y-actualización)
+- [🎼 Cómo preparar tu proyecto REAPER](#-cómo-preparar-tu-proyecto-reaper)
+- [🎮 Cómo usar](#-cómo-usar)
+- [📖 Modos de salto explicados](#-modos-de-salto-explicados)
+- [🛠️ Estructura del proyecto](#️-estructura-del-proyecto)
+- [🐛 Solución de problemas](#-solución-de-problemas)
+- [🧪 Modo demo](#-modo-demo-sin-reaper)
+- [📚 Documentación adicional](#-documentación-adicional)
+- [🚧 Limitaciones conocidas](#-limitaciones-conocidas)
+- [🎯 Roadmap](#-roadmap)
+- [🤝 Contribuir](#-contribuir)
+- [📜 Licencia](#-licencia)
+- [🙏 Agradecimientos](#-agradecimientos)
+- [📞 Contacto](#-contacto)
+
+---
+
 ## 🎯 ¿Por qué usar esto?
 
 Si tocas en directo con REAPER y necesitas:
