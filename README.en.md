@@ -54,6 +54,19 @@ If you play live with REAPER and need to:
 
 ---
 
+## 📸 Screenshots Gallery
+
+### Song list view
+![Song list](./assets/song-list.png)
+
+### Song detail view - Sections (with jump modes)
+![Song detail - Sections](./assets/song-detail-sections.png)
+
+### Song detail view - Mix (faders and controls)
+![Song detail - Mix](./assets/song-detail-mix.png)
+
+---
+
 ## 🚀 Installation and Update
 
 ### 📥 Direct Download (No Git)

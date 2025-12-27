@@ -54,6 +54,19 @@ Si tocas en directo con REAPER y necesitas:
 
 ---
 
+## 📸 Galería de pantallas
+
+### Vista de canciones
+![Lista de canciones](./assets/song-list.png)
+
+### Vista de secciones (con modo de salto)
+![Detalle de canción - Secciones](./assets/song-detail-sections.png)
+
+### Vista de mezcla (faders y controles)
+![Detalle de canción - Mezcla](./assets/song-detail-mix.png)
+
+---
+
 ## 🚀 Instalación y Actualización
 
 ### 📥 Descarga Directa (Sin Git)
