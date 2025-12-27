@@ -57,13 +57,29 @@ If you play live with REAPER and need to:
 ## 📸 Screenshots Gallery
 
 ### Song list view
-![Song list](./assets/song-list.png)
+![Song list](./assets/images/song-list.png)
 
 ### Song detail view - Sections (with jump modes)
-![Song detail - Sections](./assets/song-detail-sections.png)
+![Song detail - Sections](./assets/images/song-detail-sections.png)
 
 ### Song detail view - Mix (faders and controls)
-![Song detail - Mix](./assets/song-detail-mix.png)
+![Song detail - Mix](./assets/images/song-detail-mix.png)
+
+---
+
+## 🎼 Example Project
+
+In the `/assets/` folder you'll find a fully configured REAPER example project ready to use:
+
+- **File**: [`Examplen.rpp`](./assets/Examplen.rpp)
+- **Includes**: An example song with sections (Intro, Verse, Chorus, etc.)
+- **Tracks**: Click, Guide, and multiple backing tracks
+- **Usage**: Download it and open it in REAPER to see how the application works
+
+This project is perfect for:
+- 🧪 Testing the application without any setup
+- 📚 Learning how to structure your own projects
+- 🎵 Seeing a real-world usage example
 
 ---
 

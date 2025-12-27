@@ -57,13 +57,29 @@ Si tocas en directo con REAPER y necesitas:
 ## 📸 Galería de pantallas
 
 ### Vista de canciones
-![Lista de canciones](./assets/song-list.png)
+![Lista de canciones](./assets/images/song-list.png)
 
 ### Vista de secciones (con modo de salto)
-![Detalle de canción - Secciones](./assets/song-detail-sections.png)
+![Detalle de canción - Secciones](./assets/images/song-detail-sections.png)
 
 ### Vista de mezcla (faders y controles)
-![Detalle de canción - Mezcla](./assets/song-detail-mix.png)
+![Detalle de canción - Mezcla](./assets/images/song-detail-mix.png)
+
+---
+
+## 🎼 Proyecto de ejemplo
+
+En la carpeta `/assets/` encontrarás un proyecto REAPER de ejemplo completamente configurado y listo para usar:
+
+- **Archivo**: [`Examplen.rpp`](./assets/Examplen.rpp)
+- **Incluye**: Una canción de ejemplo con secciones (Intro, Verso, Coro, etc.)
+- **Pistas**: Click, Guía, y múltiples backing tracks
+- **Uso**: Descárgalo y ábrelo en REAPER para ver cómo funciona la aplicación
+
+Este proyecto es perfecto para:
+- 🧪 Probar la aplicación sin configurar nada
+- 📚 Aprender cómo estructurar tus propios proyectos
+- 🎵 Ver un ejemplo real de uso
 
 ---
 
