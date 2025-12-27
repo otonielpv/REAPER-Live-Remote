@@ -657,16 +657,31 @@ Write-Host "============================================================" -Foreg
 Write-Host ""
 
 Write-Host $Messages['your_local_ip'] -ForegroundColor Yellow
-$localIP = Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -notlike "*Loopback*" -and $_.IPAddress -like "192.168.*"} | Select-Object -First 1
 
-if ($localIP) {
-    $ipAddress = $localIP.IPAddress
-    Write-Host "  http://$ipAddress`:8080" -ForegroundColor Cyan -BackgroundColor Black
+# Obtener todas las IPs IPv4, excluyendo Loopback
+$allIPs = Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -notlike "*Loopback*"} | Select-Object -ExpandProperty IPAddress
+
+if ($allIPs) {
+    # Si es un array, mostrar todas; si es un string, convertir a array
+    if ($allIPs -is [string]) {
+        $allIPs = @($allIPs)
+    }
+    
+    foreach ($ip in $allIPs) {
+        Write-Host "  http://$ip`:8080" -ForegroundColor Cyan -BackgroundColor Black
+    }
+    
     Write-Host ""
     Write-Host $Messages['on_your_tablet'] -ForegroundColor White
     Write-Host $Messages['connect_same_wifi'] -ForegroundColor Gray
     Write-Host $Messages['open_browser'] -ForegroundColor Gray
-    Write-Host "$($Messages['go_to_ip']) http://$ipAddress`:8080" -ForegroundColor Gray
+    
+    # Mostrar instrucción para la primera IP (o todas si hay varias)
+    if ($allIPs.Count -gt 1) {
+        Write-Host "$($Messages['go_to_ip']) (usa cualquiera de las IPs listadas arriba)" -ForegroundColor Gray
+    } else {
+        Write-Host "$($Messages['go_to_ip']) http://$($allIPs[0])`:8080" -ForegroundColor Gray
+    }
 } else {
     Write-Host $Messages['could_not_detect_ip'] -ForegroundColor Yellow
     Write-Host ""
@@ -689,4 +704,4 @@ Write-Host $Messages['ready_live'] -ForegroundColor Green
 Write-Host ""
 
 Read-Host $Messages['press_enter_exit']
-
+exit 0

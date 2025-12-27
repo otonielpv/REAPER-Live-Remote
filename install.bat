@@ -32,23 +32,7 @@ if "%LANG%"=="es" (
     set MSG_PRESS_FINISH=Press a key to finish
 )
 
-color 0B
-cls
-
-echo.
-echo ============================================================
-echo   %TITLE%
-echo ============================================================
-echo.
-echo %MSG_CONFIG%
-echo.
-echo %MSG_PRESS%
-pause > nul
-
-REM Ejecutar el instalador PowerShell
-echo.
-echo %MSG_RUNNING%
-echo.
+REM Ejecutar el instalador PowerShell directamente sin mensajes duplicados
 
 powershell.exe -ExecutionPolicy Bypass -File "%~dp0install.ps1"
 
@@ -60,7 +44,5 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo.
-echo %MSG_COMPLETE%
-echo.
-pause
+REM PowerShell ya ha mostrado el mensaje de finalizacion, asi que no duplicamos
+exit /b 0
