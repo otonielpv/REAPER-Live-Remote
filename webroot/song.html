@@ -219,9 +219,22 @@
     }
 
     /**
+     * Limpiar recursos antes de salir de la página
+     */
+    function cleanup() {
+      // Detener polling de mixer
+      if (api.isPolling()) {
+        console.log('🧹 Limpiando polling de mixer');
+        api.stopPolling();
+      }
+      console.log('🧹 Limpiando recursos de song.html');
+    }
+
+    /**
      * Event listeners
      */
     btnBack.addEventListener('click', () => {
+      cleanup();
       window.history.back();
     });
 
@@ -266,7 +279,7 @@
     let previousSectionId = null;
     
     // Polling de estado (cada 500ms)
-    setInterval(async () => {
+    let statePollingInterval = setInterval(async () => {
       if (document.visibilityState === 'visible') {
         try {
           const playState = await api.getPlayState();
@@ -309,6 +322,10 @@
         }
       }
     }, 500);
+    
+    // Limpiar cuando se descarga la página
+    window.addEventListener('beforeunload', cleanup);
+    window.addEventListener('pagehide', cleanup);
     
   </script>
 </body>

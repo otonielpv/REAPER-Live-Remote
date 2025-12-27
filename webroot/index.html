@@ -53,47 +53,80 @@
     const statusIndicator = document.getElementById('status-indicator');
     const statusText = document.getElementById('status-text');
 
+    // Control de peticiones en vuelo
+    let loadingPromise = null;
+    let autoRefreshInterval = null;
+
+    /**
+     * Limpiar estado cuando se carga index.html
+     */
+    function initializeState() {
+      // Asegurar que no haya polling activo
+      if (api.isPolling()) {
+        console.log('🧹 Deteniendo polling residual del mixer');
+        api.stopPolling();
+      }
+      // Resetear la canción actual
+      state.setCurrentSong(null);
+      console.log('✨ Estado inicializado para vista de canciones');
+    }
+
+    // Inicializar estado
+    initializeState();
+
     /**
      * Cargar canciones desde REAPER
      */
     async function loadSongs() {
-      try {
-        ui.showLoading(songListContainer);
-        
-        // Inicializar API
-        await api.init();
-        
-        // Cargar regiones (canciones)
-        const regions = await api.getRegions();
-        console.log('📦 Regiones recibidas:', regions);
-        
-        // Actualizar estado
-        state.setRegions(regions);
-        
-        // Obtener lista de canciones
-        const songs = state.getSongs();
-        console.log('🎵 Canciones procesadas:', songs);
-        
-        // Renderizar lista
-        ui.renderSongList(songListContainer, songs);
-        
-        // Actualizar estado de conexión
-        updateConnectionStatus(true);
-        
-        console.log(`✅ Cargadas ${songs.length} canciones`);
-        
-      } catch (error) {
-        console.error('❌ Error cargando canciones:', error);
-        songListContainer.innerHTML = `
-          <div class="error-state">
-            <p data-i18n="error_connection">Connection Error</p>
-            <p class="hint" data-i18n="check_reaper">Check that REAPER is open and web server is enabled</p>
-            <p class="hint" data-i18n="connecting_to">Connecting to: http://192.168.1.39:8080</p>
-            <button class="btn-retry" onclick="window.location.reload()" data-i18n="retry">Retry</button>
-          </div>
-        `;
-        updateConnectionStatus(false);
+      // Evitar cargas simultáneas
+      if (loadingPromise) {
+        console.log('⏳ Ya hay una carga en progreso, esperando...');
+        return loadingPromise;
       }
+
+      loadingPromise = (async () => {
+        try {
+          ui.showLoading(songListContainer);
+          
+          // Inicializar API
+          await api.init();
+          
+          // Cargar regiones (canciones)
+          const regions = await api.getRegions();
+          console.log('📦 Regiones recibidas:', regions);
+          
+          // Actualizar estado
+          state.setRegions(regions);
+          
+          // Obtener lista de canciones
+          const songs = state.getSongs();
+          console.log('🎵 Canciones procesadas:', songs);
+          
+          // Renderizar lista
+          ui.renderSongList(songListContainer, songs);
+          
+          // Actualizar estado de conexión
+          updateConnectionStatus(true);
+          
+          console.log(`✅ Cargadas ${songs.length} canciones`);
+          
+        } catch (error) {
+          console.error('❌ Error cargando canciones:', error);
+          songListContainer.innerHTML = `
+            <div class="error-state">
+              <p data-i18n="error_connection">Connection Error</p>
+              <p class="hint" data-i18n="check_reaper">Check that REAPER is open and web server is enabled</p>
+              <p class="hint" data-i18n="connecting_to">Connecting to: http://192.168.1.39:8080</p>
+              <button class="btn-retry" onclick="window.location.reload()" data-i18n="retry">Retry</button>
+            </div>
+          `;
+          updateConnectionStatus(false);
+        } finally {
+          loadingPromise = null;
+        }
+      })();
+
+      return loadingPromise;
     }
 
     /**
@@ -119,12 +152,20 @@
     // Cargar al iniciar
     loadSongs();
     
-    // Recargar periódicamente (cada 30 segundos)
-    setInterval(() => {
+    // Recargar periódicamente (cada 30 segundos) solo si la página está visible
+    autoRefreshInterval = setInterval(() => {
       if (document.visibilityState === 'visible') {
         loadSongs();
       }
     }, 30000);
+    
+    // Limpiar cuando se cierra la pestaña
+    window.addEventListener('beforeunload', () => {
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+      }
+    });
     
   </script>
 </body>
