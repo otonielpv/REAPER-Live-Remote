@@ -121,7 +121,6 @@ $SpanishMessages = @{
     'press_enter_exit' = "Presiona Enter para salir"
     'install_reaper_from' = "Por favor, instala REAPER desde: https://www.reaper.fm"
 }
-}
 
 # Mensajes en inglés
 $EnglishMessages = @{
@@ -225,7 +224,6 @@ $EnglishMessages = @{
     'ready_live' = "Ready to play live!"
     'press_enter_exit' = "Press Enter to exit"
     'install_reaper_from' = "Please install REAPER from: https://www.reaper.fm"
-}
 }
 
 $Messages = if ($IsSpanish) { $SpanishMessages } else { $EnglishMessages }
