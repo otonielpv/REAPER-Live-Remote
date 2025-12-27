@@ -26,5 +26,15 @@
   "page_hidden_stopping": "Página oculta, deteniendo polling",
   "page_visible_restarting": "Página visible, reiniciando polling del mezclador",
   "section_change_detected": "Cambio de sección detectado",
-  "outside_sections": "Fuera de secciones"
+  "outside_sections": "Fuera de secciones",
+  "jump_mode": "Modo de salto",
+  "immediate": "Inmediato",
+  "by_bar": "Al compás",
+  "region_end": "Al finalizar",
+  "wait_bars": "Esperar compases (modo \"Al compás\")",
+  "bar": "compás",
+  "bars": "compases",
+  "play": "Play",
+  "stop": "Stop",
+  "song_start": "Ir al inicio de canción"
 }

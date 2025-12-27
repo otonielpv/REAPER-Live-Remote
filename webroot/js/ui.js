@@ -222,13 +222,13 @@ export function highlightActiveSection(sectionId) {
  */
 export function renderTransport(container) {
   container.innerHTML = `
-    <button id="btn-play" class="transport-btn" title="Play">
+    <button id="btn-play" class="transport-btn" title="${i18n.t('play')}">
       <span class="icon">▶️</span>
     </button>
-    <button id="btn-stop" class="transport-btn" title="Stop">
+    <button id="btn-stop" class="transport-btn" title="${i18n.t('stop')}">
       <span class="icon">⏹️</span>
     </button>
-    <button id="btn-goto-start" class="transport-btn" title="Ir al inicio de canción">
+    <button id="btn-goto-start" class="transport-btn" title="${i18n.t('song_start')}">
       <span class="icon">⏮️</span>
     </button>
   `;
@@ -299,16 +299,16 @@ async function goToSongStart() {
 export function renderJumpModeToggle(container, currentMode) {
   container.innerHTML = `
     <div class="jump-mode-toggle">
-      <label>Modo de salto:</label>
+      <label>${i18n.t('jump_mode')}:</label>
       <div class="toggle-buttons">
         <button class="toggle-btn ${currentMode === 'immediate' ? 'active' : ''}" data-mode="immediate">
-          Inmediato
+          ${i18n.t('immediate')}
         </button>
         <button class="toggle-btn ${currentMode === 'bar' ? 'active' : ''}" data-mode="bar">
-          Al compás
+          ${i18n.t('by_bar')}
         </button>
         <button class="toggle-btn ${currentMode === 'region-end' ? 'active' : ''}" data-mode="region-end">
-          Al finalizar
+          ${i18n.t('region_end')}
         </button>
       </div>
     </div>
@@ -341,13 +341,13 @@ export function renderMixerOptions(container) {
   container.innerHTML = `
     <div class="mixer-options">
       <label class="bar-count-label">
-        <span>🎵 Esperar compases (modo "Al compás"):</span>
+        <span>🎵 ${i18n.t('wait_bars')}:</span>
         <select id="bar-count-select">
-          <option value="1" ${barCount === 1 ? 'selected' : ''}>1 compás</option>
-          <option value="2" ${barCount === 2 ? 'selected' : ''}>2 compases</option>
-          <option value="4" ${barCount === 4 ? 'selected' : ''}>4 compases</option>
-          <option value="8" ${barCount === 8 ? 'selected' : ''}>8 compases</option>
-          <option value="16" ${barCount === 16 ? 'selected' : ''}>16 compases</option>
+          <option value="1" ${barCount === 1 ? 'selected' : ''}>1 ${i18n.t('bar')}</option>
+          <option value="2" ${barCount === 2 ? 'selected' : ''}>2 ${i18n.t('bars')}</option>
+          <option value="4" ${barCount === 4 ? 'selected' : ''}>4 ${i18n.t('bars')}</option>
+          <option value="8" ${barCount === 8 ? 'selected' : ''}>8 ${i18n.t('bars')}</option>
+          <option value="16" ${barCount === 16 ? 'selected' : ''}>16 ${i18n.t('bars')}</option>
         </select>
       </label>
     </div>

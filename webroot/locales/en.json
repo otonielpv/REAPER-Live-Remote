@@ -26,5 +26,15 @@
   "page_hidden_stopping": "Page hidden, stopping polling",
   "page_visible_restarting": "Page visible, restarting mixer polling",
   "section_change_detected": "Section change detected",
-  "outside_sections": "Outside sections"
+  "outside_sections": "Outside sections",
+  "jump_mode": "Jump Mode",
+  "immediate": "Immediate",
+  "by_bar": "By Bar",
+  "region_end": "At End",
+  "wait_bars": "Wait bars (\"By Bar\" mode)",
+  "bar": "bar",
+  "bars": "bars",
+  "play": "Play",
+  "stop": "Stop",
+  "song_start": "Song Start"
 }

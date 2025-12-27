@@ -12,11 +12,14 @@
   <div class="app-container">
     <!-- Header -->
     <header class="app-header">
-      <button id="btn-back" class="icon-btn" data-i18n-title="back" title="Back">
-        ← Back
+      <button id="btn-back" class="icon-btn" data-i18n="back" data-i18n-title="back" title="Back">
+        ← 
       </button>
       <h1 id="song-title" data-i18n="song">Song</h1>
       <div class="header-actions">
+        <button id="btn-lang-toggle" class="icon-btn" title="Toggle Language">
+          EN
+        </button>
         <button id="btn-refresh" class="icon-btn" data-i18n-title="reload" title="Reload">
           🔄
         </button>
@@ -85,6 +88,7 @@
     const songTitle = document.getElementById('song-title');
     const btnBack = document.getElementById('btn-back');
     const btnRefresh = document.getElementById('btn-refresh');
+    const btnLangToggle = document.getElementById('btn-lang-toggle');
     const jumpModeContainer = document.getElementById('jump-mode-container');
     const barCountContainer = document.getElementById('bar-count-container');
     const transportContainer = document.getElementById('transport-container');
@@ -240,6 +244,24 @@
 
     btnRefresh.addEventListener('click', () => {
       loadSongData();
+    });
+
+    btnLangToggle.addEventListener('click', async () => {
+      const currentLang = i18n.getCurrentLang();
+      const newLang = currentLang === 'es' ? 'en' : 'es';
+      
+      // Callback to re-render components after language change
+      const reRenderComponents = () => {
+        const songSections = state.getSectionsForSong(songId);
+        const tracks = state.state.tracks;
+        
+        // Re-render the dynamic components that use i18n
+        ui.renderJumpModeToggle(jumpModeContainer, state.state.jumpMode);
+        ui.renderMixerOptions(barCountContainer);
+        ui.renderTransport(transportContainer);
+      };
+      
+      await i18n.setLanguage(newLang, reRenderComponents);
     });
 
     // Tabs

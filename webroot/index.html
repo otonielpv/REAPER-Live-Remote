@@ -14,6 +14,9 @@
     <header class="app-header">
       <h1 data-i18n="songs">Songs</h1>
       <div class="header-actions">
+        <button id="btn-lang-toggle" class="icon-btn" title="Toggle Language">
+          EN
+        </button>
         <button id="btn-refresh" class="icon-btn" data-i18n-title="reload" title="Reload">
           🔄
         </button>
@@ -50,6 +53,7 @@
     // Elementos del DOM
     const songListContainer = document.getElementById('song-list');
     const btnRefresh = document.getElementById('btn-refresh');
+    const btnLangToggle = document.getElementById('btn-lang-toggle');
     const statusIndicator = document.getElementById('status-indicator');
     const statusText = document.getElementById('status-text');
 
@@ -147,6 +151,12 @@
      */
     btnRefresh.addEventListener('click', () => {
       loadSongs();
+    });
+
+    btnLangToggle.addEventListener('click', async () => {
+      const currentLang = i18n.getCurrentLang();
+      const newLang = currentLang === 'es' ? 'en' : 'es';
+      await i18n.setLanguage(newLang);
     });
 
     // Cargar al iniciar
