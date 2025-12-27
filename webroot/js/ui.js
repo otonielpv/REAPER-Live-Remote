@@ -7,6 +7,7 @@
 import * as api from './api.js';
 import * as state from './state.js';
 import * as utils from './utils.js';
+import * as i18n from './i18n.js';
 
 /**
  * Renderizar lista de canciones en un contenedor
@@ -19,8 +20,8 @@ export function renderSongList(container, markers) {
   if (!markers || markers.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <p>No se encontraron canciones</p>
-        <p class="hint">Añade marcadores en REAPER para definir canciones</p>
+        <p>${i18n.t('no_songs_found')}</p>
+        <p class="hint">${i18n.t('add_markers')}</p>
       </div>
     `;
     return;
@@ -83,8 +84,8 @@ export function renderSections(container, sections) {
   if (!sections || sections.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <p>No se encontraron secciones</p>
-        <p class="hint">Añade marcadores en REAPER para definir secciones</p>
+        <p>${i18n.t('no_sections_found')}</p>
+        <p class="hint">${i18n.t('add_markers_sections')}</p>
       </div>
     `;
     return;
@@ -157,7 +158,7 @@ async function handleSectionClick(sectionId, jumpMode) {
     
   } catch (error) {
     console.error('❌ Error:', error);
-    alert(`Error al saltar: ${error.message}`);
+    alert(`${i18n.t('jump_error')}: ${error.message}`);
   }
 }
 
@@ -241,7 +242,7 @@ export function renderTransport(container) {
       updateTransportState(true);
     } catch (error) {
       console.error('❌ Error en play:', error);
-      alert(`Error: ${error.message}`);
+      alert(`${i18n.t('play_error')}: ${error.message}`);
     }
   });
   
@@ -253,7 +254,7 @@ export function renderTransport(container) {
       updateTransportState(false);
     } catch (error) {
       console.error('❌ Error en stop:', error);
-      alert(`Error: ${error.message}`);
+      alert(`${i18n.t('stop_error')}: ${error.message}`);
     }
   });
   

@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <title>Reaper Live Remote - Canción</title>
+  <title>Reaper Live Remote - Song</title>
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
   <div class="app-container">
     <!-- Header -->
     <header class="app-header">
-      <button id="btn-back" class="icon-btn" title="Volver">
-        ← Atrás
+      <button id="btn-back" class="icon-btn" data-i18n-title="back" title="Back">
+        ← Back
       </button>
-      <h1 id="song-title">Canción</h1>
+      <h1 id="song-title" data-i18n="song">Song</h1>
       <div class="header-actions">
-        <button id="btn-refresh" class="icon-btn" title="Recargar">
+        <button id="btn-refresh" class="icon-btn" data-i18n-title="reload" title="Reload">
           🔄
         </button>
       </div>
@@ -40,8 +40,8 @@
 
     <!-- Tabs -->
     <nav class="tabs">
-      <button class="tab-btn active" data-tab="sections">Secciones</button>
-      <button class="tab-btn" data-tab="mixer">Mezcla</button>
+      <button class="tab-btn active" data-tab="sections" data-i18n="sections">Sections</button>
+      <button class="tab-btn" data-tab="mixer" data-i18n="mix">Mix</button>
     </nav>
 
     <!-- Main Content -->
@@ -65,7 +65,7 @@
     <footer class="app-footer">
       <div class="connection-status">
         <span id="status-indicator" class="status-indicator"></span>
-        <span id="status-text">Conectando...</span>
+        <span id="status-text" data-i18n="connecting">Connecting...</span>
       </div>
     </footer>
   </div>
@@ -76,6 +76,10 @@
     import * as state from './js/state.js';
     import * as ui from './js/ui.js';
     import * as utils from './js/utils.js';
+    import * as i18n from './js/i18n.js';
+
+    // Initialize i18n
+    await i18n.initI18n();
 
     // Elementos del DOM
     const songTitle = document.getElementById('song-title');
@@ -120,7 +124,7 @@
         // Encontrar la canción (puede ser marker o region según modo)
         const song = state.getCurrentSong();
         if (!song) {
-          throw new Error('Canción no encontrada');
+          throw new Error(i18n.t('song_not_found'));
         }
         
         // Actualizar título
@@ -139,7 +143,7 @@
         
       } catch (error) {
         console.error('Error cargando canción:', error);
-        ui.showError('Error cargando datos de la canción');
+        ui.showError(i18n.t('loading_song_data'));
         updateConnectionStatus(false);
       }
     }
@@ -170,10 +174,10 @@
     function updateConnectionStatus(connected) {
       if (connected) {
         statusIndicator.className = 'status-indicator connected';
-        statusText.textContent = 'Conectado a REAPER';
+        statusText.textContent = i18n.t('connected');
       } else {
         statusIndicator.className = 'status-indicator disconnected';
-        statusText.textContent = 'Sin conexión';
+        statusText.textContent = i18n.t('disconnected');
       }
     }
 
@@ -195,7 +199,7 @@
       if (tabName === 'mixer') {
         // Iniciar polling cuando entramos a la pestaña de mezcla
         if (!api.isPolling()) {
-          console.log('🎚️ Iniciando sincronización del mezclador...');
+          console.log('🎚️ ' + i18n.t('starting_mixer_sync'));
           api.startPolling({
             onTracksUpdate: (tracks) => {
               // Actualizar estado
@@ -208,7 +212,7 @@
       } else {
         // Detener polling cuando salimos de la pestaña de mezcla
         if (api.isPolling()) {
-          console.log('🎚️ Deteniendo sincronización del mezclador');
+          console.log('🎚️ ' + i18n.t('stopping_mixer_sync'));
           api.stopPolling();
         }
       }
@@ -237,14 +241,14 @@
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') {
         if (api.isPolling()) {
-          console.log('👋 Página oculta, deteniendo polling');
+          console.log('👋 ' + i18n.t('page_hidden_stopping'));
           api.stopPolling();
         }
       } else {
         // Si volvemos a la página y estamos en la pestaña mixer, reiniciar polling
         const activeMixer = document.querySelector('.tab-content#tab-mixer.active');
         if (activeMixer && !api.isPolling()) {
-          console.log('👁️ Página visible, reiniciando polling del mezclador');
+          console.log('👁️ ' + i18n.t('page_visible_restarting'));
           api.startPolling({
             onTracksUpdate: (tracks) => {
               state.setTracks(tracks);
@@ -286,7 +290,7 @@
           // Si cambiamos de sección, actualizar UI
           if (currentSection) {
             if (currentSection.id !== previousSectionId) {
-              console.log(`📍 Cambio de sección detectado: "${currentSection.name}" (${currentSection.id})`);
+              console.log(`📍 ${i18n.t('section_change_detected')}: "${currentSection.name}" (${currentSection.id})`);
               previousSectionId = currentSection.id;
               state.setCurrentRegion(currentSection.id);
               
@@ -295,7 +299,7 @@
             }
           } else if (previousSectionId !== null) {
             // Ya no estamos en ninguna sección
-            console.log('📍 Fuera de secciones');
+            console.log('📍 ' + i18n.t('outside_sections'));
             previousSectionId = null;
             ui.highlightActiveSection(null);
           }

@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <title>Reaper Live Remote - Canciones</title>
+  <title>Reaper Live Remote - Songs</title>
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
   <div class="app-container">
     <!-- Header -->
     <header class="app-header">
-      <h1>🎸 Canciones</h1>
+      <h1 data-i18n="songs">Songs</h1>
       <div class="header-actions">
-        <button id="btn-refresh" class="icon-btn" title="Recargar">
+        <button id="btn-refresh" class="icon-btn" data-i18n-title="reload" title="Reload">
           🔄
         </button>
       </div>
@@ -31,7 +31,7 @@
     <footer class="app-footer">
       <div class="connection-status">
         <span id="status-indicator" class="status-indicator"></span>
-        <span id="status-text">Conectando...</span>
+        <span id="status-text" data-i18n="connecting">Connecting...</span>
       </div>
     </footer>
   </div>
@@ -42,6 +42,10 @@
     import * as state from './js/state.js';
     import * as ui from './js/ui.js';
     import * as utils from './js/utils.js';
+    import * as i18n from './js/i18n.js';
+
+    // Initialize i18n
+    await i18n.initI18n();
 
     // Elementos del DOM
     const songListContainer = document.getElementById('song-list');
@@ -82,10 +86,10 @@
         console.error('❌ Error cargando canciones:', error);
         songListContainer.innerHTML = `
           <div class="error-state">
-            <p>❌ Error de conexión</p>
-            <p class="hint">Verifica que REAPER esté abierto y el servidor web habilitado</p>
-            <p class="hint">Conectando a: http://192.168.1.39:8080</p>
-            <button class="btn-retry" onclick="window.location.reload()">Reintentar</button>
+            <p data-i18n="error_connection">Connection Error</p>
+            <p class="hint" data-i18n="check_reaper">Check that REAPER is open and web server is enabled</p>
+            <p class="hint" data-i18n="connecting_to">Connecting to: http://192.168.1.39:8080</p>
+            <button class="btn-retry" onclick="window.location.reload()" data-i18n="retry">Retry</button>
           </div>
         `;
         updateConnectionStatus(false);
@@ -98,10 +102,10 @@
     function updateConnectionStatus(connected) {
       if (connected) {
         statusIndicator.className = 'status-indicator connected';
-        statusText.textContent = 'Conectado a REAPER';
+        statusText.textContent = i18n.t('connected');
       } else {
         statusIndicator.className = 'status-indicator disconnected';
-        statusText.textContent = 'Sin conexión';
+        statusText.textContent = i18n.t('disconnected');
       }
     }
 
