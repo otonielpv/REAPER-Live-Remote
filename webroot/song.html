@@ -134,6 +134,10 @@
         // Actualizar título
         songTitle.textContent = song.name;
         
+        // Saltar automáticamente al inicio de la canción
+        await api.seekTo(song.pos);
+        console.log(`⏩ Saltando al inicio de la canción en ${song.pos}s`);
+        
         // Obtener secciones de esta canción (puede ser regiones o marcadores según modo)
         const songSections = state.getSectionsForSong(songId);
         
